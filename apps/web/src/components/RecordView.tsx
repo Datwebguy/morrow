@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CountNumber } from "./CountNumber";
 import { EmptyState } from "./EmptyState";
 import { RowSkeleton } from "./Skeleton";
+import { TokenLabel } from "./TokenMark";
 import { WORKER_URL } from "@/lib/api";
 import { amount, dateOnly } from "@/lib/format";
 import type { PublicPromise } from "@/lib/types";
@@ -21,7 +22,10 @@ function Row({ p }: { p: PublicPromise }) {
     <li className="rounded-2xl border border-line bg-surface p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="text-base">
-          {dateOnly(p.closeTs)} · {p.backingCoin} · {p.sizeBand}
+          <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+            <TokenLabel coin={p.backingCoin} size={24} />
+            <span className="text-muted">· {dateOnly(p.closeTs)} · {p.sizeBand}</span>
+          </span>
           {p.simulated ? <span className="ml-2 text-sm font-medium text-accent">Simulated</span> : null}
         </h3>
         <Chip p={p} />

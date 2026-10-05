@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Countdown } from "./Countdown";
 import { Gauge } from "./Gauge";
 import { Switch } from "./Switch";
+import { TokenLabel } from "./TokenMark";
 import { TrustBadge } from "./TrustBadge";
 import { Hint } from "./Hint";
 import { request } from "@/lib/api";
@@ -40,7 +41,7 @@ export function LoanCard({ loan, onChanged }: { loan: LoanView; onChanged: () =>
     <article className="rounded-2xl border border-line bg-surface p-5 sm:p-6" aria-label={`${loan.instrument} loan`}>
       <header className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg">{loan.instrument}</h2>
+          <h2 className="flex items-center gap-2 text-lg"><TokenLabel coin={loan.backingCoin} size={28} /><span className="shrink-0 text-muted">/ {loan.loanCoin}</span></h2>
           <p className="text-sm text-muted">{loan.protected ? "Protected" : "Not protected"}</p>
         </div>
         <div className="flex items-center gap-3">

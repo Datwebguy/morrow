@@ -2,6 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { TokenMark } from "@/components/TokenMark";
 import { EmptyState, ErrorNote } from "@/components/EmptyState";
 import { Gate } from "@/components/Gate";
 import { RowSkeleton } from "@/components/Skeleton";
@@ -42,7 +43,8 @@ function Row({ e, now }: { e: LogEntry; now: number }) {
   return (
     <li className="rounded-2xl border border-line bg-surface p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted">
+        <span className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted">
+          <TokenMark coin={e.instrument.split(" / ")[0] ?? ""} size={20} />
           {KIND[e.kind] ?? e.kind} · {e.instrument}
           {e.simulated ? " · preview only" : ""}
         </span>

@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { TokenLabel } from "./TokenMark";
 import { TokenPicker } from "./TokenPicker";
 import { WatchChart } from "./WatchChart";
 import { request, WORKER_URL } from "@/lib/api";
@@ -164,8 +165,9 @@ export function WatchAWeekend() {
         <div className="space-y-6">
           <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6" aria-label="Price chart">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="text-lg">
-                {result.token} · {dateTime(result.closure.closeTs)} to {dateTime(result.closure.reopenTs)}
+              <h2 className="flex flex-wrap items-center gap-x-3 gap-y-1 text-lg">
+                <TokenLabel coin={result.token} size={32} />
+                <span className="text-base font-normal text-muted">{dateTime(result.closure.closeTs)} to {dateTime(result.closure.reopenTs)}</span>
               </h2>
               <p className="text-sm text-muted">
                 Reopened <span className="num">{result.reopenMove >= 0 ? "+" : "-"}{percent(Math.abs(result.reopenMove))}</span>

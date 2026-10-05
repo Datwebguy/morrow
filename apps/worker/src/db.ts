@@ -50,6 +50,17 @@ export interface PromiseRow {
   gradedAt: number | null;
 }
 
+/** A cached token logo and company name, with where it came from and when. `source` is "none" when no real logo was found. */
+export interface LogoRow {
+  coin: string;
+  name: string | null;
+  source: "coingecko" | "company_site" | "none";
+  sourceUrl: string | null;
+  contentType: string | null;
+  image: Uint8Array | null;
+  fetchedAt: number;
+}
+
 export interface ApprovalRow {
   id: number;
   createdAt: number;
@@ -85,9 +96,38 @@ export class Store {
         id integer primary key autoincrement, ts integer not null, loan_id text not null,
         value_in_borrowed real not null, close_ts integer not null
       );
+      create table if not exists logos (
+        coin text primary key, name text, source text not null, source_url text, content_type text, image blob, fetched_at integer not null
+      );
       create index if not exists log_ts on log (ts);
       create index if not exists promises_close on promises (close_ts);
     `);
+  }
+
+  setLogo(l: LogoRow): void {
+    this.db
+      .prepare("insert into logos (coin, name, source, source_url, content_type, image, fetched_at) values (?,?,?,?,?,?,?) on conflict(coin) do update set name = excluded.name, source = excluded.source, source_url = excluded.source_url, content_type = excluded.content_type, image = excluded.image, fetched_at = excluded.fetched_at")
+      .run(l.coin, l.name, l.source, l.sourceUrl, l.contentType, l.image, l.fetchedAt);
+  }
+
+  private mapLogo(r: Record<string, unknown>): LogoRow {
+    return {
+      coin: r["coin"] as string, name: (r["name"] as string | null) ?? null, source: r["source"] as LogoRow["source"], sourceUrl: (r["source_url"] as string | null) ?? null,
+      contentType: (r["content_type"] as string | null) ?? null, image: (r["image"] as Uint8Array | null) ?? null, fetchedAt: r["fetched_at"] as number,
+    };
+  }
+
+  getLogo(coin: string): LogoRow | null {
+    const r = this.db.prepare("select * from logos where lower(coin) = lower(?)").get(coin);
+    return r ? this.mapLogo(r as Record<string, unknown>) : null;
+  }
+
+  /** Every cached logo without its image bytes. */
+  logoIndex(): Array<Omit<LogoRow, "image"> & { hasImage: boolean }> {
+    return (this.db.prepare("select coin, name, source, source_url, content_type, fetched_at, image is not null as has_image from logos order by coin").all() as Array<Record<string, unknown>>).map((r) => ({
+      coin: r["coin"] as string, name: (r["name"] as string | null) ?? null, source: r["source"] as LogoRow["source"], sourceUrl: (r["source_url"] as string | null) ?? null,
+      contentType: (r["content_type"] as string | null) ?? null, fetchedAt: r["fetched_at"] as number, hasImage: r["has_image"] === 1,
+    }));
   }
 
   getSetting<T>(key: string): T | null {

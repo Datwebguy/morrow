@@ -6,6 +6,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Countdown } from "./Countdown";
 import { Gauge } from "./Gauge";
 import { Hint } from "./Hint";
+import { TokenLabel } from "./TokenMark";
 import { TokenPicker } from "./TokenPicker";
 import { TrustBadge } from "./TrustBadge";
 import { request, WORKER_URL } from "@/lib/api";
@@ -114,8 +115,9 @@ export function CheckMyLoan() {
         {result ? (
           <article className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
             <header className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="text-lg">
-                {result.token} / {result.loanCoin}
+              <h2 className="flex items-center gap-2 text-lg">
+                <TokenLabel coin={result.token} size={32} />
+                <span className="shrink-0 text-muted">/ {result.loanCoin}</span>
               </h2>
               <p className="text-sm text-muted">Live data, {dateTime(result.asOf)}</p>
             </header>

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { EmptyState, ErrorNote } from "@/components/EmptyState";
 import { Gate } from "@/components/Gate";
 import { RowSkeleton } from "@/components/Skeleton";
+import { TokenLabel } from "@/components/TokenMark";
 import { amount, dateOnly, percent } from "@/lib/format";
 import type { OwnPromise } from "@/lib/types";
 import { useApi } from "@/lib/useApi";
@@ -22,7 +23,7 @@ function Row({ p }: { p: OwnPromise }) {
     <li className="rounded-2xl border border-line bg-surface p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-base">
-          {p.body.backingCoin} / {p.body.loanCoin} · {dateOnly(p.closeTs)}
+          <TokenLabel coin={p.body.backingCoin} size={24} /> / {p.body.loanCoin} · {dateOnly(p.closeTs)}
           {p.simulated ? " · preview only" : ""}
         </h2>
         <Chip p={p} />

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Countdown, useNow } from "./Countdown";
 import { EmptyState, ErrorNote } from "./EmptyState";
 import { LoanCardSkeleton } from "./Skeleton";
+import { TokenLabel, TokenMark } from "./TokenMark";
 import { TrustBadge } from "./TrustBadge";
 import { WORKER_URL } from "@/lib/api";
 import { ago, percent, points } from "@/lib/format";
@@ -30,7 +31,7 @@ function Card({ loan }: { loan: ShadowLoanView }) {
   return (
     <article className="rounded-2xl border border-line bg-surface p-4" aria-label={`Simulated ${loan.instrument} loan`}>
       <header className="flex items-baseline justify-between gap-3">
-        <h3 className="text-base">{loan.instrument}</h3>
+        <h3 className="flex min-w-0 items-center gap-2 text-base"><TokenMark coin={loan.backingCoin} size={24} /><span className="min-w-0 truncate">{loan.instrument}</span></h3>
         <p className="text-sm font-medium text-accent">Simulated</p>
       </header>
       {h ? (
@@ -98,7 +99,7 @@ export function PublicShadowView() {
       </div>
       {[...byToken.entries()].map(([coin, loans]) => (
         <section key={coin} aria-label={`${coin} simulated loans`}>
-          <h2 className="mb-3 text-lg">{coin}</h2>
+          <h2 className="mb-3 text-lg"><TokenLabel coin={coin} size={28} /></h2>
           <div className="grid gap-5 sm:grid-cols-2">
             {loans.map((l) => (
               <Card key={l.orderId} loan={l} />

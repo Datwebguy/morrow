@@ -12,6 +12,8 @@ export const BITGET_PATHS = {
   candles: "/api/v2/spot/market/candles",
   orderBook: "/api/v2/spot/market/orderbook",
   announcements: "/api/v2/public/annoucements", // Bitget's own spelling
+  /** Every coin with its chains and contract addresses. Source: https://www.bitget.com/api-doc/spot/market/Get-Coin-Info */
+  coins: "/api/v2/spot/public/coins",
 } as const;
 
 /** Unit conversions: true constants. */
@@ -81,6 +83,32 @@ export const SIMULATION = {
   watchStartPosition: 0.5,
   /** How many stock tokens the shadow ledger follows (the most traded ones, read live). */
   shadowTokens: 5,
+} as const;
+
+/**
+ * Token logos and company names (fetched on a schedule and cached with their source and date; never typed in or kept as files in the repo).
+ * 1. Bitget gives each token's contract address. 2. CoinGecko gives the logo and name for that contract (https://docs.coingecko.com/reference/coins-contract-address).
+ * 3. Otherwise the company's own website logo, found through Wikidata (https://www.wikidata.org). 4. Otherwise the site shows initials.
+ */
+export const LOGOS = {
+  coingeckoBase: "https://api.coingecko.com/api/v3",
+  wikidataEndpoint: "https://query.wikidata.org/sparql",
+  /** Sent with every request so the services can see who is asking. */
+  userAgent: "Morrow/1.0 (+https://themorrow.vercel.app)",
+  /** CoinGecko's free tier is rate limited, so lookups are spaced this far apart. */
+  minSecondsBetweenCoingeckoCalls: 8,
+  /** Wait this long after a rate-limit answer that does not say how long. */
+  defaultBackoffSeconds: 60,
+  /** A cached logo is looked up again after this many days. A token with no logo is retried sooner. */
+  refreshDays: 7,
+  retryMissingDays: 1,
+  /** How often the worker checks whether any logo is due. */
+  checkEveryMinutes: 10,
+  /** Larger images are refused. */
+  maxImageBytes: 500_000,
+  requestTimeoutSeconds: 15,
+  /** Rate-limit answers tolerated for one token before it is left for the next pass. */
+  maxTriesPerToken: 3,
 } as const;
 
 /** One stock token's biggest real gap down at a reopen, found by scripts/replay/src/featured.ts from Bitget hourly candles. */

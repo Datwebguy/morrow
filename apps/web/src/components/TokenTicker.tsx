@@ -1,18 +1,19 @@
 "use client";
 
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
-import { badge, signedPercent, type MarketToken } from "@/lib/market";
+import { TokenMark } from "./TokenMark";
+import { signedPercent, type MarketToken } from "@/lib/market";
+import { useLogos } from "@/lib/useLogos";
 import { useMarket } from "@/lib/useMarket";
 
 function Chip({ t }: { t: MarketToken }) {
   const up = t.change24h >= 0;
+  const name = useLogos()?.get(t.coin.toLowerCase())?.name ?? null;
   return (
     <li className="flex shrink-0 items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3">
-      <span className="num flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xs font-semibold text-canvas" aria-hidden>
-        {badge(t.coin)}
-      </span>
+      <TokenMark coin={t.coin} size={36} />
       <span className="leading-tight">
-        <span className="block text-sm font-semibold">{t.coin}</span>
+        <span className="block max-w-40 truncate text-sm font-semibold">{t.coin}{name ? <span className="font-normal text-muted"> · {name}</span> : null}</span>
         <span className="num block text-sm text-muted">{t.price.toLocaleString("en-US", { maximumFractionDigits: 2 })} USDT</span>
       </span>
       <span className={`num ml-1 inline-flex items-center gap-0.5 text-sm font-medium ${up ? "text-safe" : "text-danger"}`}>

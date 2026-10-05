@@ -46,7 +46,10 @@ export function Footer() {
       </div>
       <div className="bg-ink text-canvas">
         <div className="flex flex-col gap-1.5 px-6 py-5 text-xs sm:flex-row sm:justify-between sm:px-10 md:px-14">
-          <p>Built on Bitget · {new Date().getFullYear()}</p>
+          <p>
+            Built on Bitget · {new Date().getFullYear()} · Token logos from{" "}
+            <a href="https://www.coingecko.com" rel="noreferrer" className="underline underline-offset-2">CoinGecko</a> and company websites
+          </p>
           <p>Protection reduces risk. It cannot remove it.</p>
         </div>
       </div>

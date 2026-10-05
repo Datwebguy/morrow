@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { TokenMark } from "./TokenMark";
 import type { TokenOption } from "@/lib/types";
 
 const MAX_SHOWN = 40; // enough to scroll, short enough to scan
@@ -58,6 +59,7 @@ export function TokenPicker({ tokens, failed, value, onChange, id }: { tokens: T
 
   return (
     <div ref={box} className="relative">
+      {chosen && !open ? <TokenMark coin={chosen.coin} size={28} className="pointer-events-none absolute left-3 top-[calc(0.375rem+1.25rem)] -translate-y-1/2" /> : null}
       <input
         id={id}
         role="combobox"
@@ -95,7 +97,7 @@ export function TokenPicker({ tokens, failed, value, onChange, id }: { tokens: T
             setOpen(false);
           }
         }}
-        className="mt-1.5 h-12 w-full rounded-xl border border-line bg-surface px-4 text-base text-ink"
+        className={`mt-1.5 h-12 w-full rounded-xl border border-line bg-surface pr-4 text-base text-ink ${chosen && !open ? "pl-12" : "pl-4"}`}
       />
       {open && tokens ? (
         <ul id={listId} role="listbox" aria-label="Stock tokens" className="absolute inset-x-0 z-20 mt-1 max-h-72 overflow-y-auto rounded-xl border border-line bg-surface py-1 shadow-lg">
@@ -115,6 +117,7 @@ export function TokenPicker({ tokens, failed, value, onChange, id }: { tokens: T
                 onMouseEnter={() => setActive(i)}
                 className={`flex cursor-pointer items-baseline gap-2 px-4 py-2.5 text-sm ${i === active ? "bg-line/60" : ""}`}
               >
+                <TokenMark coin={t.coin} size={24} className="self-center" />
                 <span className="num font-medium">{t.coin}</span>
                 {t.name ? <span className="min-w-0 truncate text-muted">{t.name}</span> : null}
               </li>

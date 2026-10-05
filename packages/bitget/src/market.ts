@@ -137,6 +137,27 @@ export async function fetchQuote(symbol: string, o: MarketOptions = {}): Promise
   };
 }
 
+export interface CoinChain {
+  chain: string;
+  contractAddress: string;
+}
+
+/** Every coin's chains and contract addresses in one call. Chains with no contract address are left out. No key needed. */
+export async function fetchCoinChains(o: MarketOptions = {}): Promise<Map<string, CoinChain[]>> {
+  const rows = arr(await getData(BITGET_PATHS.coins, {}, o), "coins");
+  const out = new Map<string, CoinChain[]>();
+  for (const x of rows) {
+    const r = obj(x, "coin");
+    if (typeof r["coin"] !== "string") continue;
+    const chains = (Array.isArray(r["chains"]) ? r["chains"] : [])
+      .map((c) => obj(c, "chain"))
+      .filter((c) => typeof c["chain"] === "string" && typeof c["contractAddress"] === "string" && c["contractAddress"] !== "")
+      .map((c) => ({ chain: String(c["chain"]), contractAddress: String(c["contractAddress"]) }));
+    out.set(r["coin"].toUpperCase(), chains);
+  }
+  return out;
+}
+
 /** Traded value over the last 24 hours in USDT for every spot symbol, live from Bitget. No key needed. */
 export async function fetchTradedValues(o: MarketOptions = {}): Promise<Map<string, number>> {
   const rows = arr(await getData(BITGET_PATHS.tickers, {}, o), "tickers");

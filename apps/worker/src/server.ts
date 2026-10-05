@@ -156,6 +156,16 @@ export function createServer(d: ServerDeps): Server {
           return send(res, 503, { error: "Bitget's token list could not be read right now. Try again in a minute." }, publicCors);
         }
       }
+      if (req.method === "GET" && path === "/public/logos") {
+        return send(res, 200, { note: "Token logos and company names, each with its source and the date it was fetched. A token with source none has no real logo, so the site shows initials.", logos: d.store.logoIndex() }, { ...publicCors, "cache-control": "public, max-age=300" });
+      }
+      const logoMatch = path.match(/^\/public\/logo\/([A-Za-z0-9]{1,20})$/);
+      if (req.method === "GET" && logoMatch) {
+        const row = d.store.getLogo(logoMatch[1] as string);
+        if (!row || !row.image || !row.contentType) return send(res, 404, { error: "No logo for that token." }, publicCors);
+        res.writeHead(200, { "content-type": row.contentType, "cache-control": "public, max-age=86400", "x-logo-source": row.source, "x-logo-fetched": new Date(row.fetchedAt).toISOString(), ...publicCors });
+        return void res.end(Buffer.from(row.image));
+      }
       if (req.method === "GET" && path === "/public/watch/featured") return send(res, 200, { featured: FEATURED_CLOSURE.featured }, publicCors);
       if (req.method === "GET" && path === "/public/watch") {
         const q = url.searchParams;

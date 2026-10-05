@@ -21,10 +21,10 @@ export function keysFromEnv(env: NodeJS.ProcessEnv): Keys | null {
   return apiKey && secretKey && passphrase ? { apiKey, secretKey, passphrase } : null;
 }
 
-/** Stock tokens Bitget accepts as loan backing and lists as online right now, with company names where the directory has one. Read live. */
-export async function liveBackingTokens(names: CompanyNames): Promise<Array<{ coin: string; name: string | null }>> {
+/** Stock tokens Bitget accepts as loan backing and lists as online right now, with company names (CoinGecko's, else the Nasdaq directory's) where one exists. Read live. */
+export async function liveBackingTokens(names: CompanyNames, logoName: (coin: string) => string | null = () => null): Promise<Array<{ coin: string; name: string | null }>> {
   const stocks = (await fetchCollateralStocks()).filter((s) => s.online).sort((a, b) => a.baseCoin.localeCompare(b.baseCoin));
-  return Promise.all(stocks.map(async (s) => ({ coin: s.baseCoin, name: await names.nameOf(s.baseCoin) })));
+  return Promise.all(stocks.map(async (s) => ({ coin: s.baseCoin, name: logoName(s.baseCoin) ?? (await names.nameOf(s.baseCoin)) })));
 }
 
 /** The stock tokens with the most trading in the last 24 hours that Bitget accepts as backing. Bitget publishes no "most borrowed" figure, so this is the nearest live measure. */

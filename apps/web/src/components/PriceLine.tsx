@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
+import { TokenLabel } from "./TokenMark";
 import { layoutLine, type LineData } from "@/lib/line";
 import { percent } from "@/lib/format";
 
@@ -52,7 +53,7 @@ export function PriceLine() {
         {live && data ? (
           <>
             <span className="inline-flex items-center gap-2">
-              <span className="h-0.5 w-5 rounded bg-accent" aria-hidden /> Live hourly price of {data.coin}
+              <span className="h-0.5 w-5 rounded bg-accent" aria-hidden /> Live hourly price of <TokenLabel coin={data.coin} size={20} strong={false} />
             </span>
             {data.band ? (
               <span className="inline-flex items-center gap-2">
