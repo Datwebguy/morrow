@@ -126,6 +126,19 @@ fieldset > legend + * {
   100% { background-position: -200% 0; }
 }
 
+/* The token band: endless slow scroll, paused on hover, still for visitors who ask for less motion. */
+.ticker { overflow: hidden; }
+.ticker-track { animation: ticker 90s linear infinite; }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker { overflow-x: auto; }
+  .ticker-track { animation: none !important; }
+}
+
 .word-rise {
   animation: word-rise 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }

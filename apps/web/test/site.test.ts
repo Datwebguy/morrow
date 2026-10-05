@@ -89,3 +89,29 @@ describe("copy", () => {
     expect(all).not.toMatch(/\$\s?\d|\d\s?USDT|\d+\s?%/);
   });
 });
+
+import { badge, ladder, mostCommon, signedPercent } from "../src/lib/market";
+
+describe("market band helpers", () => {
+  it("places the levels along a bar that ends at the liquidation level", () => {
+    const p = ladder({ start: 0.5, marginCall: 0.6, liquidation: 0.8 });
+    expect(p.liquidation).toBe(100);
+    expect(p.marginCall).toBeCloseTo(75);
+    expect(p.start).toBeCloseTo(62.5);
+  });
+  it("keeps positions inside the bar", () => {
+    expect(ladder({ start: 2, marginCall: -1, liquidation: 1 })).toEqual({ start: 100, marginCall: 0, liquidation: 100 });
+  });
+  it("finds the most common value and whether all were the same", () => {
+    expect(mostCommon([1, 1, 2], String)).toEqual({ item: 1, uniform: false });
+    expect(mostCommon([3, 3], String)).toEqual({ item: 3, uniform: true });
+    expect(mostCommon([], String)).toBeNull();
+  });
+  it("makes a two-letter badge and a signed percentage", () => {
+    expect(badge("rNVDA")).toBe("NV");
+    expect(badge("rA")).toBe("A");
+    expect(signedPercent(0.01234)).toBe("+1.23%");
+    expect(signedPercent(-0.005)).toBe("−0.50%");
+    expect(signedPercent(0)).toBe("+0.00%");
+  });
+});

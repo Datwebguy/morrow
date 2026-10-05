@@ -7,37 +7,45 @@ const COLS = [
   { title: "Build", links: [{ label: "GitHub", href: "https://github.com/Datwebguy/morrow" }, { label: "Bitget docs", href: "https://www.bitget.com/api-doc/uta/intro" }] },
 ] as const;
 
+/** A split footer: a blue brand panel beside (or above, on phones) a white panel of divided link columns, then a dark base. */
 export function Footer() {
   return (
-    <footer className="border-t border-line">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_repeat(3,1fr)]">
-        <div>
-          <Logo />
-          <p className="mt-3 max-w-xs text-sm text-muted">Borrow today. Still yours tomorrow.</p>
+    <footer>
+      <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
+        <div className="flex flex-col justify-between gap-12 bg-accent px-6 py-12 text-on-accent sm:px-10 md:px-14 md:py-16">
+          <div>
+            <Logo size={34} className="text-on-accent" feet="var(--on-accent)" />
+            <p className="mt-6 max-w-xs text-2xl font-semibold leading-snug" style={{ letterSpacing: "-0.02em" }}>
+              Borrow today. Still yours tomorrow.
+            </p>
+          </div>
+          <p className="max-w-xs text-sm">Stock-token loans on Bitget, watched around every market closure.</p>
         </div>
-        {COLS.map((c) => (
-          <nav key={c.title} aria-label={c.title}>
-            <h2 className="text-sm font-semibold">{c.title}</h2>
-            <ul className="mt-3 space-y-2">
-              {c.links.map((l) => (
-                <li key={l.label}>
-                  {l.href.startsWith("http") ? (
-                    <a href={l.href} className="text-sm text-muted hover:text-ink" rel="noreferrer">
-                      {l.label}
-                    </a>
-                  ) : (
-                    <Link href={l.href} className="text-sm text-muted hover:text-ink">
-                      {l.label}
-                    </Link>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ))}
+        <nav aria-label="Footer" className="grid grid-cols-3 divide-x divide-line bg-surface">
+          {COLS.map((c) => (
+            <div key={c.title} className="px-4 py-8 sm:px-8 md:py-16">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">{c.title}</h2>
+              <ul className="mt-5 space-y-3.5">
+                {c.links.map((l) => (
+                  <li key={l.label}>
+                    {l.href.startsWith("http") ? (
+                      <a href={l.href} className="text-sm font-medium hover:text-accent" rel="noreferrer">
+                        {l.label}
+                      </a>
+                    ) : (
+                      <Link href={l.href} className="text-sm font-medium hover:text-accent">
+                        {l.label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
       </div>
-      <div className="border-t border-line">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-muted sm:flex-row sm:justify-between sm:px-6">
+      <div className="bg-ink text-canvas">
+        <div className="flex flex-col gap-1.5 px-6 py-5 text-xs sm:flex-row sm:justify-between sm:px-10 md:px-14">
           <p>Built on Bitget · {new Date().getFullYear()}</p>
           <p>Protection reduces risk. It cannot remove it.</p>
         </div>
