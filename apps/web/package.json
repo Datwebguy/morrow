@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@morrow/bitget": "*",
     "@morrow/config": "*",
     "@morrow/core": "*",
     "geist": "^1.3.0",

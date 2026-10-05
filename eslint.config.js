@@ -10,7 +10,7 @@ export default tseslint.config(
   { languageOptions: { globals: { ...globals.node } } },
   {
     // The screenshot script runs small functions inside the browser page.
-    files: ["tools/screenshots.mjs"],
+    files: ["tools/screenshots.mjs", "tools/check-copy.mjs"],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },
   {

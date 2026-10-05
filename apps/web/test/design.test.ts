@@ -55,9 +55,9 @@ function sources(dir: string): string[] {
 }
 
 describe("words on screen (AGENTS.md section 8)", () => {
-  // Developer words that must never reach the user. lib/types.ts and lib/api.ts name server fields and are not shown.
+  // Developer words that must never reach the user. lib/types.ts and lib/api.ts name server fields, and app/api is server code: none of it is shown.
   const banned = [/\bLTV\b/i, /loan-to-value/i, /forceRate/, /supRate/, /\bpledge\b/i, /collateral/i, /\bAPI key\b/i, /\bOAuth\b/i, /order id/i, /request id/i, /tx hash/i, /SHA-?256/i, /\bhash\b/i, /stack trace/i, /revise/i, /repayCoins/];
-  const files = sources(join(__dirname, "../src")).filter((f) => !/lib\/(types|api)\.ts$/.test(f));
+  const files = sources(join(__dirname, "../src")).filter((f) => !/lib\/(types|api)\.ts$|\/app\/api\//.test(f));
   it("keeps developer terms out of every screen's text", () => {
     const hits: string[] = [];
     for (const f of files) {

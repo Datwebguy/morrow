@@ -19,12 +19,26 @@ for (const scheme of ["light", "dark"]) {
       await page.goto(site + p, { waitUntil: "networkidle" });
       await page.waitForTimeout(500);
       const file = `${out}/${(p === "/" ? "home" : p.replace(/^\//, "").replace(/\//g, "-"))}-${name}-${scheme}.png`;
-      // Size the window to the whole page so fixed bars sit where they really are, then capture it.
-      const height = await page.evaluate(() => Math.max(document.documentElement.scrollHeight, window.innerHeight));
-      await page.setViewportSize({ width: viewport.width, height });
-      await page.waitForTimeout(150);
-      await page.screenshot({ path: file });
-      await page.setViewportSize(viewport);
+      if (process.env["FULL_PAGE"] === "1") {
+        // Marketing pages: a true full-page capture, so viewport-height sections keep their real size.
+        // Scroll through first, as a visitor would, so sections that fade in on scroll are showing.
+        await page.evaluate(async () => {
+          for (let y = 0; y < document.body.scrollHeight; y += 400) {
+            window.scrollTo(0, y);
+            await new Promise((r) => setTimeout(r, 60));
+          }
+          window.scrollTo(0, 0);
+        });
+        await page.waitForTimeout(700);
+        await page.screenshot({ path: file, fullPage: true });
+      } else {
+        // App screens: size the window to the page so the fixed tab bar sits where it really is.
+        const height = await page.evaluate(() => Math.max(document.documentElement.scrollHeight, window.innerHeight));
+        await page.setViewportSize({ width: viewport.width, height });
+        await page.waitForTimeout(150);
+        await page.screenshot({ path: file });
+        await page.setViewportSize(viewport);
+      }
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
       console.log(`${file}${overflow ? "  SIDEWAYS SCROLL" : ""}`);
     }
