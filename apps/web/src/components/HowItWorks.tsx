@@ -1,8 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
 import { CalendarClock, Gauge, ShieldCheck, CheckCircle2 } from "lucide-react";
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 const STROKE = 1.75;
 
@@ -81,42 +80,47 @@ function Card({ step, index }: { step: Step; index: number }) {
   );
 }
 
-/** Three steps on a sticky scroll from medium screens up, and a plain stack on small ones. */
+/**
+ * Three steps. On wider screens the title and the step list stay pinned on the left while the three cards scroll past on the
+ * right, and the step in view lights up. There is no empty scroll track, so nothing is ever blank. On small screens it is
+ * just the three cards in a stack.
+ */
 export function HowItWorks() {
-  const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  useMotionValueEvent(scrollYProgress, "change", (v) => setActive(Math.min(STEPS.length - 1, Math.floor(v * STEPS.length))));
+  const cards = useRef<Array<HTMLDivElement | null>>([]);
+  useEffect(() => {
+    const els = cards.current.filter((e): e is HTMLDivElement => e !== null);
+    // The card crossing the middle of the screen is the active one.
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset["i"]));
+      },
+      { rootMargin: "-45% 0px -45% 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
   return (
-    <section id="how" aria-labelledby="how-title" className="mx-auto mt-16 w-full max-w-6xl scroll-mt-8 px-4 sm:mt-20 sm:px-6">
-      <div ref={ref} className="md:h-[230vh]">
-        <div className="md:sticky md:top-0 md:flex md:h-dvh md:items-start md:pt-[12vh]">
-          <div className="grid w-full gap-10 md:grid-cols-2 md:items-center">
-            <div>
-              <p className="text-sm font-medium text-accent">How it works</p>
-              <h2 id="how-title" className="mt-2 text-3xl sm:text-4xl">Weekend move. Monday projected. Protected.</h2>
-              <ol className="mt-8 hidden space-y-3 md:block" aria-hidden>
-                {STEPS.map((s, i) => (
-                  <li key={s.title} className={`flex items-center gap-3 text-lg transition-colors ${i === active ? "text-ink" : "text-muted"}`}>
-                    <span className={`h-2 w-8 rounded-full transition-colors ${i === active ? "bg-accent" : "bg-line"}`} />
-                    {s.title}
-                  </li>
-                ))}
-              </ol>
+    <section id="how" aria-labelledby="how-title" className="mx-auto mt-16 w-full max-w-6xl scroll-mt-8 px-4 sm:mt-24 sm:px-6">
+      <div className="grid gap-10 md:grid-cols-2 md:gap-16">
+        <div className="md:sticky md:top-28 md:self-start">
+          <p className="text-sm font-medium text-accent">How it works</p>
+          <h2 id="how-title" className="mt-2 text-3xl sm:text-4xl">Weekend move. Monday projected. Protected.</h2>
+          <ol className="mt-8 hidden space-y-3 md:block" aria-hidden>
+            {STEPS.map((s, i) => (
+              <li key={s.title} className={`flex items-center gap-3 text-lg transition-colors ${i === active ? "text-ink" : "text-muted"}`}>
+                <span className={`h-2 rounded-full transition-all ${i === active ? "w-12 bg-accent" : "w-8 bg-line"}`} />
+                {s.title}
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div className="space-y-6 md:space-y-10 md:py-4">
+          {STEPS.map((s, i) => (
+            <div key={s.title} data-i={i} ref={(el) => void (cards.current[i] = el)} className="md:py-6">
+              <Card step={s} index={i} />
             </div>
-            <div className="hidden md:block">
-              <AnimatePresence mode="wait">
-                <motion.div key={active} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.3 }}>
-                  <Card step={STEPS[active]!} index={active} />
-                </motion.div>
-              </AnimatePresence>
-            </div>
-            <div className="space-y-5 md:hidden">
-              {STEPS.map((s, i) => (
-                <Card key={s.title} step={s} index={i} />
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
