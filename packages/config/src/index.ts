@@ -108,6 +108,8 @@ export const SCHEDULE = {
   bookLevels: 50,
   /** How many Bitget announcements are shown to the AI. */
   announcementsForAi: 5,
+  /** The AI gets this many seconds to answer. A slow or failed answer becomes an alert, never an action. */
+  modelTimeoutSeconds: 25,
 } as const;
 
 /**

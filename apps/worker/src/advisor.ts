@@ -1,3 +1,4 @@
+import { SCHEDULE } from "@morrow/config";
 import type { ActionKind } from "@morrow/core";
 
 /** What the AI is shown. Numbers only come from live data and code. */
@@ -59,6 +60,17 @@ export interface ModelConfig {
   apiKey: string;
 }
 
+/**
+ * Reads the model settings from the environment. Any chat-completions endpoint works, so switching provider
+ * (Gemini, OpenAI, Qwen and the like) means changing only these three variables. The older MODEL_* names still work.
+ */
+export function modelConfigFromEnv(env: NodeJS.ProcessEnv): ModelConfig | null {
+  const baseUrl = env["LLM_BASE_URL"] || env["MODEL_BASE_URL"];
+  const model = env["LLM_MODEL"] || env["MODEL_NAME"];
+  const apiKey = env["LLM_API_KEY"] || env["MODEL_API_KEY"];
+  return baseUrl && model && apiKey ? { baseUrl, model, apiKey } : null;
+}
+
 type FetchLike = (url: string, init: { method: string; headers: Record<string, string>; body: string }) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
 
 const SYSTEM = [
@@ -70,24 +82,35 @@ const SYSTEM = [
 ].join(" ");
 
 /** A chat-completions endpoint (the common request format most model hosts accept). */
-export function modelAdvisor(cfg: ModelConfig, fetchImpl: FetchLike = (u, i) => fetch(u, i)): Advisor {
+export function modelAdvisor(cfg: ModelConfig, fetchImpl: FetchLike = (u, i) => fetch(u, { ...i, signal: AbortSignal.timeout(SCHEDULE.modelTimeoutSeconds * 1000) })): Advisor {
+  const unreachable: Choice = { action: "alert", reason: "The assistant could not be reached, so Morrow only alerts you.", by: cfg.model };
   return {
     async choose(s) {
-      const res = await fetchImpl(`${cfg.baseUrl.replace(/\/$/, "")}/chat/completions`, {
-        method: "POST",
-        headers: { "content-type": "application/json", authorization: `Bearer ${cfg.apiKey}` },
-        body: JSON.stringify({
-          model: cfg.model,
-          temperature: 0,
-          messages: [
-            { role: "system", content: SYSTEM },
-            { role: "user", content: JSON.stringify(s) },
-          ],
-        }),
-      });
-      if (!res.ok) return { action: "alert", reason: "The assistant could not be reached, so Morrow only alerts you.", by: cfg.model };
-      const body = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-      const text = body.choices?.[0]?.message?.content ?? "";
+      let res: Awaited<ReturnType<FetchLike>>;
+      try {
+        res = await fetchImpl(`${cfg.baseUrl.replace(/\/$/, "")}/chat/completions`, {
+          method: "POST",
+          headers: { "content-type": "application/json", authorization: `Bearer ${cfg.apiKey}` },
+          body: JSON.stringify({
+            model: cfg.model,
+            temperature: 0,
+            messages: [
+              { role: "system", content: SYSTEM },
+              { role: "user", content: JSON.stringify(s) },
+            ],
+          }),
+        });
+      } catch {
+        return unreachable;
+      }
+      if (!res.ok) return unreachable;
+      let text = "";
+      try {
+        const body = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+        text = body.choices?.[0]?.message?.content ?? "";
+      } catch {
+        return unreachable;
+      }
       return parseChoice(text, cfg.model);
     },
   };

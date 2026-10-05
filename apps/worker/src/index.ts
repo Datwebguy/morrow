@@ -1,6 +1,6 @@
 import { dirname, join } from "node:path";
 import { SCHEDULE } from "@morrow/config";
-import { modelAdvisor, rulesAdvisor, type Advisor } from "./advisor";
+import { modelAdvisor, modelConfigFromEnv, rulesAdvisor, type Advisor } from "./advisor";
 import { ProfileCache } from "./assess";
 import { checkCalendar } from "./calendarCheck";
 import { nextDelaySeconds, runCycle } from "./cycle";
@@ -13,10 +13,8 @@ const env = process.env;
 const store = new Store(env["DATABASE_PATH"] ?? "morrow.db");
 const keys = keysFromEnv(env);
 const ports = livePorts({ keys, telegramToken: env["TELEGRAM_BOT_TOKEN"], isDisconnected: () => store.getSetting<boolean>("disconnected") === true });
-const advisor: Advisor =
-  env["MODEL_BASE_URL"] && env["MODEL_NAME"] && env["MODEL_API_KEY"]
-    ? modelAdvisor({ baseUrl: env["MODEL_BASE_URL"], model: env["MODEL_NAME"], apiKey: env["MODEL_API_KEY"] })
-    : rulesAdvisor;
+const modelConfig = modelConfigFromEnv(env);
+const advisor: Advisor = modelConfig ? modelAdvisor(modelConfig) : rulesAdvisor;
 // Real writes only when the owner has set this to go-live. Otherwise every action is a dry run.
 const liveActions = env["MORROW_LIVE_ACTIONS"] === "go-live";
 const cache = new ProfileCache(ports);
@@ -28,8 +26,8 @@ const shadow = shadowPorts(ports, shadowStore);
 const shadowDeps = { store: shadowStore, ports: shadow, advisor, liveActions: false, cache: new ProfileCache(shadow) };
 
 const port = Number(env["PORT"] ?? 8787);
-createServer({ ...deps, appToken: env["APP_TOKEN"] ?? null, allowedOrigin: env["APP_ORIGIN"] ?? null, connected: keys !== null, listTokens: liveBackingTokens, shadowStore }).listen(port, () => {
-  console.log(`Morrow worker on port ${port}. Bitget ${keys ? "connected" : "not connected"}. Actions: ${liveActions ? "LIVE" : "dry run"}. Advisor: ${env["MODEL_NAME"] ?? "rules only"}.`);
+createServer({ ...deps, appToken: env["APP_TOKEN"] ?? null, allowedOrigin: env["APP_ORIGIN"] ?? null, connected: keys !== null, listTokens: liveBackingTokens, shadowStore, modelName: modelConfig?.model ?? "rules only" }).listen(port, () => {
+  console.log(`Morrow worker on port ${port}. Bitget ${keys ? "connected" : "not connected"}. Actions: ${liveActions ? "LIVE" : "dry run"}. Advisor: ${modelConfig?.model ?? "rules only"}.`);
 });
 
 let lastCalendarCheck = 0;

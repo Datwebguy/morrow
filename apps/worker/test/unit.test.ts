@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { modelAdvisor, parseChoice, rulesAdvisor, type Situation } from "../src/advisor";
+import { modelAdvisor, modelConfigFromEnv, parseChoice, rulesAdvisor, type Situation } from "../src/advisor";
 import { parseBalances, parseLoans } from "../src/loans";
 import { canonicalJson, seal, sizeBand, verifySeal, type PromiseBody } from "../src/promise";
 import { Store } from "../src/db";
@@ -101,5 +101,38 @@ describe("advisor", () => {
   it("rules only accepts the code plan and says so", async () => {
     expect(await rulesAdvisor.choose(sit)).toMatchObject({ action: "pay_down", by: "rules only" });
     expect((await rulesAdvisor.choose({ plan: null } as unknown as Situation)).action).toBe("none");
+  });
+});
+
+describe("model settings", () => {
+  const sit = { plan: { kind: "pay_down", amount: 5 } } as unknown as Situation;
+  const gemini = { LLM_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/openai/", LLM_MODEL: "model-a", LLM_API_KEY: "k" };
+  it("reads the three LLM variables, and needs all three", () => {
+    expect(modelConfigFromEnv(gemini)).toEqual({ baseUrl: gemini.LLM_BASE_URL, model: "model-a", apiKey: "k" });
+    expect(modelConfigFromEnv({ ...gemini, LLM_API_KEY: "" })).toBeNull();
+    expect(modelConfigFromEnv({})).toBeNull();
+  });
+  it("still accepts the older MODEL_* names, and LLM_* wins when both are set", () => {
+    expect(modelConfigFromEnv({ MODEL_BASE_URL: "https://old.test/v1", MODEL_NAME: "old", MODEL_API_KEY: "o" })).toEqual({ baseUrl: "https://old.test/v1", model: "old", apiKey: "o" });
+    expect(modelConfigFromEnv({ ...gemini, MODEL_NAME: "old", MODEL_BASE_URL: "https://old.test", MODEL_API_KEY: "o" })?.model).toBe("model-a");
+  });
+  it("switching provider is only a change of those variables: the same request goes to the new base URL and model", async () => {
+    const seen: Array<{ url: string; model: string; auth: string }> = [];
+    for (const env of [gemini, { LLM_BASE_URL: "https://other.test/v1", LLM_MODEL: "model-b", LLM_API_KEY: "k2" }]) {
+      const cfg = modelConfigFromEnv(env)!;
+      await modelAdvisor(cfg, async (url, init) => {
+        seen.push({ url, model: JSON.parse(init.body).model, auth: init.headers["authorization"] ?? "" });
+        return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: '{"action":"none","reason":"ok"}' } }] }) };
+      }).choose(sit);
+    }
+    expect(seen).toEqual([
+      { url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", model: "model-a", auth: "Bearer k" },
+      { url: "https://other.test/v1/chat/completions", model: "model-b", auth: "Bearer k2" },
+    ]);
+  });
+  it("a network failure, a timeout or a broken answer becomes an alert, never an action or a crash", async () => {
+    const cfg = { baseUrl: "https://x.test", model: "m", apiKey: "k" };
+    expect((await modelAdvisor(cfg, async () => Promise.reject(new Error("timeout"))).choose(sit)).action).toBe("alert");
+    expect((await modelAdvisor(cfg, async () => ({ ok: true, status: 200, json: async () => Promise.reject(new Error("bad json")) })).choose(sit)).action).toBe("alert");
   });
 });

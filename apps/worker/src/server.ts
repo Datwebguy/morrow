@@ -22,6 +22,8 @@ export interface ServerDeps extends ApproveDeps {
   listTokens?: () => Promise<string[]>;
   /** The shadow ledger's own store (its simulated loan, log and promises). Absent: no shadow ledger. */
   shadowStore?: Store;
+  /** The model that makes the AI choice ("rules only" when none is set). Shown on the public health route, never the key. */
+  modelName?: string;
 }
 
 const DISCONNECTED = "disconnected";
@@ -96,7 +98,7 @@ export function createServer(d: ServerDeps): Server {
         res.writeHead(204, { "access-control-allow-origin": o, "access-control-allow-headers": "authorization, content-type", "access-control-allow-methods": "GET, PUT, POST, OPTIONS" });
         return void res.end();
       }
-      if (req.method === "GET" && path === "/public/health") return send(res, 200, { ok: true, now: d.ports.nowMs() }, publicCors);
+      if (req.method === "GET" && path === "/public/health") return send(res, 200, { ok: true, now: d.ports.nowMs(), model: d.modelName ?? "rules only" }, publicCors);
       if (req.method === "GET" && path === "/public/record") return send(res, 200, publicRecord(d.store, d.shadowStore), publicCors);
       if (req.method === "GET" && path === "/public/shadow") return send(res, 200, shadowLog(d.shadowStore), publicCors);
       if (req.method === "GET" && path === "/public/check/tokens") {

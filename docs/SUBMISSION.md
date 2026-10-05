@@ -84,7 +84,7 @@ AI should judge, and code should enforce. In Morrow the model reads the situatio
 
 ## Role of the AI model
 
-**You need to fill in the model name before you submit.** At the time of writing no model is connected. Morrow reads `MODEL_BASE_URL`, `MODEL_NAME` and `MODEL_API_KEY` (any chat-completions endpoint, which fits the hackathon gateway once credits are approved). Without them it runs "rules only", where the code's own smallest plan is accepted, and every log line says "rules only" so it is never mistaken for a model.
+**The model:** Google Gemini through its OpenAI-compatible endpoint, set with `LLM_BASE_URL`, `LLM_MODEL` and `LLM_API_KEY` (Google's current fast model is `gemini-3.8-flash`). Switching to another provider, Qwen included, means changing only those three variables (`docs/MODELS.md`). The worker reports the model it is running at `/public/health`, and every logged decision records the model that made it. **Before you submit, confirm the name from `/public/health` and the log.** If the key is not set, Morrow runs "rules only" and the log says so, so the form must say that instead.
 
 What the model decides: for a loan that is projected near its margin-call level, one of none, alert, pay down or add backing, and one plain sentence for the user. It is shown the projected loan health, the price trust result, the move since the close, the stock's historical reopening drop, the code's smallest plan, the actions the user allows, and the latest Bitget announcements.
 
@@ -118,6 +118,6 @@ Demo Day and K3 subsidy: your choice. Not filled in.
 
 1. Post the X post. Without it the entry is invalid.
 2. Record the video from `docs/VIDEO_SCRIPT.md` and add its link.
-3. Fill in the model name above, or leave "rules only" if that is the truth.
+3. Check `/public/health` on the worker shows the Gemini model name, and name that model in the form. If it says "rules only", say "rules only".
 4. The app behind "Connect Bitget" is the owner's own account only. Show `/check` (public) and the shadow ledger (`/public/shadow` on the worker) in the video, and label anything simulated as simulated.
 5. If you connect a real loan, run it in Ask me first mode with dry run until you decide to go live, and replace the simulated case with your own.
