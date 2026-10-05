@@ -32,7 +32,10 @@ export function ReplayHeadline({ report }: { report: ReplayReport }) {
         Loans opened at <span className="num">{percent(h.low.start, 0)}</span> (weekend risk alone): <span className="num">{n(h.low.withoutMorrow)}</span> margin calls without Morrow, <span className="num">{n(h.low.withMorrow)}</span> with, at <span className="num">{percent(h.low.costShare, 2)}</span> of the debt.
       </p>
       <p className="mt-2 max-w-3xl text-sm text-muted">
-        {n(h.tokens)} stock tokens, real Bitget hourly prices, replay run {dateOnly(Date.parse(report.generatedAt))}. Each loan is counted under both ways Bitget may value backing while the market is closed. A loan opened this close to the margin-call level is mostly paid down at the start, so the lower row is the clearer test.
+        {n(h.tokens)} stock tokens, real Bitget hourly prices, replay run {dateOnly(Date.parse(report.generatedAt))}.
+      </p>
+      <p className="mt-2 max-w-3xl text-sm text-muted">
+        Counted under both ways Bitget may value backing while the market is closed. At <span className="num">{percent(h.high.start, 0)}</span> much of the cost is paying down at the start, so the <span className="num">{percent(h.low.start, 0)}</span> row is the clearer test.
       </p>
     </section>
   );
