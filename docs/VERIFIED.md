@@ -22,8 +22,20 @@ Handling: Morrow asks for a main-account API key with trade permission and withd
 
 ## Item 3. Demo environment and Crypto Loans
 
-**Unknown.** The CLI README says `--paper-trading` applies to write operations across domains and routes to the demo environment with a demo key. It does not say the demo environment holds Crypto Loans. Needs a demo key to test.
-Handling: until confirmed, the hackathon log is a shadow ledger: live prices, live loan parameters, `dryRun` previews, every entry labelled "simulated".
+**Answer: no. The demo environment does not serve Crypto Loans.** Checked 5 Oct 2026 against `https://api.bitget.com` with the demo header (`paptrading: 1`), no key needed:
+
+| Request with `paptrading: 1` | Result |
+|---|---|
+| `GET /api/v3/market/instruments` | `00000 success` (market data works in demo) |
+| `GET /api/v2/spot/market/tickers` | `00000 success` |
+| `GET /api/v3/loan/coins` | `40404 Request URL NOT FOUND` (the same call without the header returns `00000 success`) |
+| `GET /api/v3/loan/borrow-ongoing` | `40404 Request URL NOT FOUND` |
+| `GET /api/v3/loan/debts` | `40404 Request URL NOT FOUND` |
+
+The loan routes do not exist in demo, while other routes answer normally with the same header. Bitget's documentation pages (demo trading, UTA intro, Crypto Loan intro) do not state the scope either way. Source of the test: the calls above, run on 2026-10-05.
+
+Consequence (AGENTS.md section 3): the hackathon log runs as a shadow ledger on live prices, live loan parameters and `dryRun` previews, every entry labelled "simulated", or on the owner's one real loan. Never fake a fill.
+
 
 ## Item 4. Response fields of `borrow-ongoing` and `debts`
 
