@@ -10,7 +10,7 @@ Borrow against stocks on Bitget? The risk is the weekend.
 Morrow watches your loans, projects Monday's reopen, and pays down or adds backing before a margin call. It never sells, borrows or withdraws.
 
 #BitgetHackathon @Bitget_AI
-https://morrow-rust-five.vercel.app
+https://themorrow.vercel.app
 ```
 
 ## Longer version (if your account allows long posts)
@@ -23,7 +23,7 @@ Morrow watches your stock-token loans, works out what Monday's reopen does to th
 Every promise is sealed before the close and graded in public after the reopen.
 
 #BitgetHackathon @Bitget_AI
-https://morrow-rust-five.vercel.app
+https://themorrow.vercel.app
 ```
 
 Do not add numbers from the replay unless you also say they are simulated. The live record starts with the first real protected closure.

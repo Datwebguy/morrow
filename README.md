@@ -22,8 +22,8 @@ The AI chooses the kind of action. Code sizes it and checks every rule. Nothing 
 
 ## Proof
 
-- Live site: https://morrow-rust-five.vercel.app
-- Public record: https://morrow-rust-five.vercel.app/record
+- Live site: https://themorrow.vercel.app
+- Public record: https://themorrow.vercel.app/record
 - History replay (real Bitget prices, simulated loans): [docs/METHOD.md](docs/METHOD.md) and `apps/web/public/replay-report.json`
 - One full closure, step by step (simulated loan on real prices): [docs/closure-dry-run-RARMUSDT-2026-09-28.md](docs/closure-dry-run-RARMUSDT-2026-09-28.md)
 - What was checked against Bitget, with sources and dates: [docs/VERIFIED.md](docs/VERIFIED.md)

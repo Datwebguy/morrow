@@ -2,7 +2,7 @@
 
 Home page, run on 2026-10-05 with Lighthouse in headless Chromium. Mobile uses Lighthouse's default mobile profile (slow 4G, 4x slower CPU).
 
-## Live site (https://morrow-rust-five.vercel.app), measured from the build sandbox
+## Live site (https://themorrow.vercel.app), measured from the build sandbox (the same site, before the name changed to themorrow.vercel.app)
 
 - Mobile: performance 89, accessibility 100, best-practices 100, seo 100; FCP 1.9 s, LCP 3.5 s
 - Desktop: performance 100, accessibility 100, best-practices 100, seo 100; FCP 0.5 s, LCP 0.5 s

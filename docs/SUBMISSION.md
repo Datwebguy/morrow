@@ -32,7 +32,7 @@ The value is simple: wake up on Monday still owning the stocks. The user chooses
 
 ### 3. Validation data and metrics
 
-All figures in this part are **simulated loans on real Bitget prices**. They are not results from real users. Method: `docs/METHOD.md`. Data: `apps/web/public/replay-report.json`, also at https://morrow-rust-five.vercel.app/replay-report.json.
+All figures in this part are **simulated loans on real Bitget prices**. They are not results from real users. Method: `docs/METHOD.md`. Data: `apps/web/public/replay-report.json`, also at https://themorrow.vercel.app/replay-report.json.
 
 Setup: the 185 stock tokens Bitget accepts as loan backing, hourly prices from 1 January 2026 (the first year the official NYSE calendar covers), 40 closures, loans simulated at 65%, 70% and 74% loan health, run both ways for how Crypto Loans might value backing while the US market is closed (live price, and held at the last close). Rules were set on the earlier period only. The most recent six weeks (6 closures) were run once as the out-of-sample test.
 
@@ -89,11 +89,11 @@ What code enforces, whatever the model says: the amount (smallest plan that reac
 ## Submission Materials Links
 
 ```
-Website: https://morrow-rust-five.vercel.app
-App: https://morrow-rust-five.vercel.app/app
-Public record: https://morrow-rust-five.vercel.app/record
+Website: https://themorrow.vercel.app
+App: https://themorrow.vercel.app/app
+Public record: https://themorrow.vercel.app/record
 Repository: https://github.com/Datwebguy/morrow
-Replay report (data): https://morrow-rust-five.vercel.app/replay-report.json
+Replay report (data): https://themorrow.vercel.app/replay-report.json
 Replay method: https://github.com/Datwebguy/morrow/blob/HEAD/docs/METHOD.md
 Action log (one closure, simulated): https://github.com/Datwebguy/morrow/blob/HEAD/docs/closure-dry-run-RARMUSDT-2026-09-28.md
 Video: (add the link after you record it from docs/VIDEO_SCRIPT.md)

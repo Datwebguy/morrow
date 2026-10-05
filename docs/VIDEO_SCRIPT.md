@@ -9,7 +9,7 @@ If you have connected a real loan by the time you record, record that instead an
 ## Setup before recording
 
 - Light theme, 1280 by 800 browser window, no other tabs.
-- Open `docs/closure-dry-run-RARMUSDT-2026-09-28.md` rendered on GitHub in one tab and https://morrow-rust-five.vercel.app in another.
+- Open `docs/closure-dry-run-RARMUSDT-2026-09-28.md` rendered on GitHub in one tab and https://themorrow.vercel.app in another.
 
 ## Script
 
