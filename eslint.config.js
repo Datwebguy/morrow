@@ -9,6 +9,11 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   { languageOptions: { globals: { ...globals.node } } },
   {
+    // The screenshot script runs small functions inside the browser page.
+    files: ["tools/screenshots.mjs"],
+    languageOptions: { globals: { ...globals.browser, ...globals.node } },
+  },
+  {
     files: ["apps/web/**/*.{ts,tsx}"],
     plugins: { "react-hooks": reactHooks },
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
