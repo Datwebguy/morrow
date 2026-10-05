@@ -111,6 +111,19 @@ export const LOGOS = {
   maxTriesPerToken: 3,
 } as const;
 
+/**
+ * The Anthropic API as the AI model (official SDK, not a compatibility layer). Model ids are from Anthropic's model list
+ * (https://docs.anthropic.com/en/docs/about-claude/models). The choice is one of four words, so low effort is enough.
+ */
+export const ANTHROPIC_ADVISOR = {
+  defaultModel: "claude-opus-5-5",
+  /** Used by the server-side refusal fallback if the first model declines a request. */
+  fallbackModel: "claude-opus-4-8",
+  effort: "low",
+  /** Thinking tokens count toward this, so it is generous for a one-line answer. */
+  maxTokens: 4096,
+} as const;
+
 /** One stock token's biggest real gap down at a reopen, found by scripts/replay/src/featured.ts from Bitget hourly candles. */
 export interface FeaturedClosure {
   coin: string;

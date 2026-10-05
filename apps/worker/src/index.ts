@@ -2,7 +2,7 @@ import { dirname, join } from "node:path";
 import { LOGOS, NYSE_CALENDAR, SCHEDULE, SIMULATION } from "@morrow/config";
 import { fetchCoinChains } from "@morrow/bitget";
 import { currentOrNextClosure } from "@morrow/core";
-import { modelAdvisor, modelConfigFromEnv, rulesAdvisor, type Advisor } from "./advisor";
+import { advisorFor, modelConfigFromEnv, rulesAdvisor, type Advisor } from "./advisor";
 import { ProfileCache } from "./assess";
 import { checkCalendar } from "./calendarCheck";
 import { nextDelaySeconds, runCycle } from "./cycle";
@@ -18,7 +18,7 @@ const store = new Store(env["DATABASE_PATH"] ?? "morrow.db");
 const keys = keysFromEnv(env);
 const ports = livePorts({ keys, telegramToken: env["TELEGRAM_BOT_TOKEN"], isDisconnected: () => store.getSetting<boolean>("disconnected") === true });
 const modelConfig = modelConfigFromEnv(env);
-const advisor: Advisor = modelConfig ? modelAdvisor(modelConfig) : rulesAdvisor;
+const advisor: Advisor = modelConfig ? advisorFor(modelConfig) : rulesAdvisor;
 // Real writes only when the owner has set this to go-live. Otherwise every action is a dry run.
 const liveActions = env["MORROW_LIVE_ACTIONS"] === "go-live";
 const cache = new ProfileCache(ports);

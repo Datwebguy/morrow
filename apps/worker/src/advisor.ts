@@ -1,4 +1,5 @@
-import { SCHEDULE } from "@morrow/config";
+import Anthropic from "@anthropic-ai/sdk";
+import { ANTHROPIC_ADVISOR, SCHEDULE } from "@morrow/config";
 import type { ActionKind } from "@morrow/core";
 
 /** What the AI is shown. Numbers only come from live data and code. */
@@ -55,20 +56,33 @@ export function parseChoice(text: string, by: string): Choice {
 }
 
 export interface ModelConfig {
+  /** "anthropic" uses Anthropic's own SDK. "openai-compatible" is any chat-completions endpoint (Gemini, OpenAI, Qwen and the like). */
+  provider: "anthropic" | "openai-compatible";
+  /** Needed for openai-compatible. Optional for anthropic (its own address is the default). */
   baseUrl: string;
   model: string;
   apiKey: string;
 }
 
 /**
- * Reads the model settings from the environment. Any chat-completions endpoint works, so switching provider
- * (Gemini, OpenAI, Qwen and the like) means changing only these three variables. The older MODEL_* names still work.
+ * Reads the model settings from the environment. Switching provider means changing only these variables.
+ * LLM_PROVIDER picks the kind; when it is not set, an Anthropic key (sk-ant-...) or an api.anthropic.com address means Anthropic.
+ * The older MODEL_* names still work.
  */
 export function modelConfigFromEnv(env: NodeJS.ProcessEnv): ModelConfig | null {
-  const baseUrl = env["LLM_BASE_URL"] || env["MODEL_BASE_URL"];
+  const baseUrl = env["LLM_BASE_URL"] || env["MODEL_BASE_URL"] || "";
+  const apiKey = env["LLM_API_KEY"] || env["MODEL_API_KEY"] || "";
+  const named = env["LLM_PROVIDER"];
+  const anthropic = named ? named === "anthropic" : apiKey.startsWith("sk-ant-") || baseUrl.includes("api.anthropic.com");
+  if (anthropic) {
+    // A leftover address or model name from another provider (Gemini, say) must not break Anthropic: the SDK has its own address
+    // (ANTHROPIC_BASE_URL overrides it), and only a Claude model name is used.
+    const named = env["LLM_MODEL"] || env["MODEL_NAME"] || "";
+    const model = /^claude/i.test(named) ? named : ANTHROPIC_ADVISOR.defaultModel;
+    return apiKey ? { provider: "anthropic", baseUrl: "", model, apiKey } : null;
+  }
   const model = env["LLM_MODEL"] || env["MODEL_NAME"];
-  const apiKey = env["LLM_API_KEY"] || env["MODEL_API_KEY"];
-  return baseUrl && model && apiKey ? { baseUrl, model, apiKey } : null;
+  return baseUrl && model && apiKey ? { provider: "openai-compatible", baseUrl, model, apiKey } : null;
 }
 
 type FetchLike = (url: string, init: { method: string; headers: Record<string, string>; body: string }) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
@@ -80,6 +94,42 @@ const SYSTEM = [
   "Answer with one JSON object: {\"action\": \"...\", \"reason\": \"one short plain sentence for the user\"}.",
   "Use the words loan health, margin-call level, backing, pay down, add backing. No jargon.",
 ].join(" ");
+
+type MessagesCreate = (params: Anthropic.Beta.MessageCreateParamsNonStreaming) => Promise<Anthropic.Beta.BetaMessage>;
+
+/** Anthropic's own API through the official SDK. The model gets the same one-word choice, and any failure or refusal becomes an alert. */
+export function anthropicAdvisor(cfg: ModelConfig, create?: MessagesCreate): Advisor {
+  const client = create ? null : new Anthropic({ apiKey: cfg.apiKey, ...(cfg.baseUrl ? { baseURL: cfg.baseUrl } : {}), timeout: SCHEDULE.modelTimeoutSeconds * 1000 });
+  const call: MessagesCreate = create ?? ((p) => client!.beta.messages.create(p));
+  const unreachable: Choice = { action: "alert", reason: "The assistant could not be reached, so Morrow only alerts you.", by: cfg.model };
+  return {
+    async choose(s) {
+      let msg: Anthropic.Beta.BetaMessage;
+      try {
+        msg = await call({
+          model: cfg.model,
+          max_tokens: ANTHROPIC_ADVISOR.maxTokens,
+          // If a safety check declines the request, the API retries it on the fallback model inside the same call.
+          betas: ["server-side-fallback-2026-06-01"],
+          fallbacks: [{ model: ANTHROPIC_ADVISOR.fallbackModel }],
+          output_config: { effort: ANTHROPIC_ADVISOR.effort },
+          system: SYSTEM,
+          messages: [{ role: "user", content: JSON.stringify(s) }],
+        });
+      } catch {
+        return unreachable;
+      }
+      if (msg.stop_reason === "refusal" || msg.stop_reason === "max_tokens") return unreachable;
+      const text = msg.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
+      return parseChoice(text, cfg.model);
+    },
+  };
+}
+
+/** The advisor for a model config. */
+export function advisorFor(cfg: ModelConfig): Advisor {
+  return cfg.provider === "anthropic" ? anthropicAdvisor(cfg) : modelAdvisor(cfg);
+}
 
 /** A chat-completions endpoint (the common request format most model hosts accept). */
 export function modelAdvisor(cfg: ModelConfig, fetchImpl: FetchLike = (u, i) => fetch(u, { ...i, signal: AbortSignal.timeout(SCHEDULE.modelTimeoutSeconds * 1000) })): Advisor {

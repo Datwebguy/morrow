@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { modelAdvisor, modelConfigFromEnv, parseChoice, rulesAdvisor, type Situation } from "../src/advisor";
+import { anthropicAdvisor, advisorFor, modelAdvisor, modelConfigFromEnv, parseChoice, rulesAdvisor, type Situation } from "../src/advisor";
 import { parseBalances, parseLoans } from "../src/loans";
 import { canonicalJson, seal, sizeBand, verifySeal, type PromiseBody } from "../src/promise";
 import { Store } from "../src/db";
@@ -87,7 +87,7 @@ describe("advisor", () => {
   });
   it("calls a chat-completions endpoint", async () => {
     let seen = "";
-    const a = modelAdvisor({ baseUrl: "https://x.test/v1/", model: "m1", apiKey: "k" }, async (url, init) => {
+    const a = modelAdvisor({ provider: "openai-compatible", baseUrl: "https://x.test/v1/", model: "m1", apiKey: "k" }, async (url, init) => {
       seen = url + init.body;
       return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: '{"action":"alert","reason":"Watch it."}' } }] }) };
     });
@@ -95,7 +95,7 @@ describe("advisor", () => {
     expect(seen).toContain("https://x.test/v1/chat/completions");
   });
   it("only alerts when the model cannot be reached", async () => {
-    const a = modelAdvisor({ baseUrl: "https://x.test", model: "m1", apiKey: "k" }, async () => ({ ok: false, status: 500, json: async () => ({}) }));
+    const a = modelAdvisor({ provider: "openai-compatible", baseUrl: "https://x.test", model: "m1", apiKey: "k" }, async () => ({ ok: false, status: 500, json: async () => ({}) }));
     expect((await a.choose(sit)).action).toBe("alert");
   });
   it("rules only accepts the code plan and says so", async () => {
@@ -108,12 +108,12 @@ describe("model settings", () => {
   const sit = { plan: { kind: "pay_down", amount: 5 } } as unknown as Situation;
   const gemini = { LLM_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/openai/", LLM_MODEL: "model-a", LLM_API_KEY: "k" };
   it("reads the three LLM variables, and needs all three", () => {
-    expect(modelConfigFromEnv(gemini)).toEqual({ baseUrl: gemini.LLM_BASE_URL, model: "model-a", apiKey: "k" });
+    expect(modelConfigFromEnv(gemini)).toEqual({ provider: "openai-compatible", baseUrl: gemini.LLM_BASE_URL, model: "model-a", apiKey: "k" });
     expect(modelConfigFromEnv({ ...gemini, LLM_API_KEY: "" })).toBeNull();
     expect(modelConfigFromEnv({})).toBeNull();
   });
   it("still accepts the older MODEL_* names, and LLM_* wins when both are set", () => {
-    expect(modelConfigFromEnv({ MODEL_BASE_URL: "https://old.test/v1", MODEL_NAME: "old", MODEL_API_KEY: "o" })).toEqual({ baseUrl: "https://old.test/v1", model: "old", apiKey: "o" });
+    expect(modelConfigFromEnv({ MODEL_BASE_URL: "https://old.test/v1", MODEL_NAME: "old", MODEL_API_KEY: "o" })).toEqual({ provider: "openai-compatible", baseUrl: "https://old.test/v1", model: "old", apiKey: "o" });
     expect(modelConfigFromEnv({ ...gemini, MODEL_NAME: "old", MODEL_BASE_URL: "https://old.test", MODEL_API_KEY: "o" })?.model).toBe("model-a");
   });
   it("switching provider is only a change of those variables: the same request goes to the new base URL and model", async () => {
@@ -131,8 +131,63 @@ describe("model settings", () => {
     ]);
   });
   it("a network failure, a timeout or a broken answer becomes an alert, never an action or a crash", async () => {
-    const cfg = { baseUrl: "https://x.test", model: "m", apiKey: "k" };
+    const cfg = { provider: "openai-compatible" as const, baseUrl: "https://x.test", model: "m", apiKey: "k" };
     expect((await modelAdvisor(cfg, async () => Promise.reject(new Error("timeout"))).choose(sit)).action).toBe("alert");
     expect((await modelAdvisor(cfg, async () => ({ ok: true, status: 200, json: async () => Promise.reject(new Error("bad json")) })).choose(sit)).action).toBe("alert");
+  });
+});
+
+describe("Anthropic as the model", () => {
+  const sit = { plan: { kind: "pay_down", amount: 5 } } as unknown as Situation;
+  const reply = (over: Record<string, unknown>) => ({ stop_reason: "end_turn", content: [{ type: "text", text: '{"action":"pay_down","reason":"Loan health is too close."}' }], ...over }) as never;
+
+  it("is chosen by LLM_PROVIDER, by an Anthropic key, or by Anthropic's address, with a default model and no address needed", () => {
+    const want = { provider: "anthropic", baseUrl: "", model: "claude-opus-5-5", apiKey: "sk-ant-x" };
+    expect(modelConfigFromEnv({ LLM_API_KEY: "sk-ant-x" })).toEqual(want);
+    expect(modelConfigFromEnv({ LLM_PROVIDER: "anthropic", LLM_API_KEY: "k", LLM_MODEL: "claude-sonnet-5-5" })).toMatchObject({ provider: "anthropic", model: "claude-sonnet-5-5" });
+    expect(modelConfigFromEnv({ LLM_BASE_URL: "https://api.anthropic.com/v1/", LLM_API_KEY: "k" })).toMatchObject({ provider: "anthropic", baseUrl: "" });
+    expect(modelConfigFromEnv({ LLM_PROVIDER: "anthropic" })).toBeNull(); // no key
+  });
+
+  it("ignores a leftover Gemini address and model name when the key is Anthropic's", () => {
+    const left = { LLM_API_KEY: "sk-ant-x", LLM_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/openai/", LLM_MODEL: "gemini-3.8-flash" };
+    expect(modelConfigFromEnv(left)).toEqual({ provider: "anthropic", baseUrl: "", model: "claude-opus-5-5", apiKey: "sk-ant-x" });
+  });
+
+  it("ignores the other provider's leftover address and model when switching, and an empty value counts as not set", () => {
+    const env = { LLM_PROVIDER: "anthropic", LLM_API_KEY: "sk-ant-x", LLM_BASE_URL: "", LLM_MODEL: "" };
+    expect(modelConfigFromEnv(env)).toEqual({ provider: "anthropic", baseUrl: "", model: "claude-opus-5-5", apiKey: "sk-ant-x" });
+  });
+
+  it("asks Claude for the one-word choice with the official request shape: no sampling settings, low effort, refusal fallback", async () => {
+    let seen: Record<string, unknown> = {};
+    const a = anthropicAdvisor({ provider: "anthropic", baseUrl: "", model: "claude-opus-5-5", apiKey: "k" }, async (p) => {
+      seen = p as unknown as Record<string, unknown>;
+      return reply({});
+    });
+    expect(await a.choose(sit)).toEqual({ action: "pay_down", reason: "Loan health is too close.", by: "claude-opus-5-5" });
+    expect(seen).toMatchObject({ model: "claude-opus-5-5", output_config: { effort: "low" }, betas: ["server-side-fallback-2026-06-01"], fallbacks: [{ model: "claude-opus-4-8" }] });
+    expect(seen).not.toHaveProperty("temperature");
+    expect(seen).not.toHaveProperty("thinking");
+    expect(JSON.stringify(seen["messages"])).toContain("pay_down");
+  });
+
+  it("reads only the text blocks, so thinking blocks are ignored", async () => {
+    const a = anthropicAdvisor({ provider: "anthropic", baseUrl: "", model: "m", apiKey: "k" }, async () =>
+      reply({ content: [{ type: "thinking", thinking: "", signature: "s" }, { type: "text", text: '{"action":"none","reason":"Safe."}' }] }));
+    expect((await a.choose(sit)).action).toBe("none");
+  });
+
+  it("turns a refusal, a cut-off answer, an error or a broken answer into an alert, never an action or a crash", async () => {
+    const cfg = { provider: "anthropic" as const, baseUrl: "", model: "m", apiKey: "k" };
+    expect((await anthropicAdvisor(cfg, async () => reply({ stop_reason: "refusal" })).choose(sit)).action).toBe("alert");
+    expect((await anthropicAdvisor(cfg, async () => reply({ stop_reason: "max_tokens" })).choose(sit)).action).toBe("alert");
+    expect((await anthropicAdvisor(cfg, async () => Promise.reject(new Error("529 overloaded"))).choose(sit)).action).toBe("alert");
+    expect((await anthropicAdvisor(cfg, async () => reply({ content: [{ type: "text", text: "pay down!" }] })).choose(sit)).action).toBe("alert");
+  });
+
+  it("picks the right advisor for each provider", () => {
+    expect(typeof advisorFor({ provider: "anthropic", baseUrl: "", model: "m", apiKey: "k" }).choose).toBe("function");
+    expect(typeof advisorFor({ provider: "openai-compatible", baseUrl: "https://x.test", model: "m", apiKey: "k" }).choose).toBe("function");
   });
 });
