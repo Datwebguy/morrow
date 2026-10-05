@@ -69,7 +69,7 @@ const SYSTEM = [
   "Use the words loan health, margin-call level, backing, pay down, add backing. No jargon.",
 ].join(" ");
 
-/** An OpenAI-compatible chat endpoint. */
+/** A chat-completions endpoint (the common request format most model hosts accept). */
 export function modelAdvisor(cfg: ModelConfig, fetchImpl: FetchLike = (u, i) => fetch(u, i)): Advisor {
   return {
     async choose(s) {

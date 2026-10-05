@@ -80,7 +80,7 @@ AI should judge, and code should enforce. In Morrow the model reads the situatio
 
 ## Role of the AI model
 
-**You need to fill in the model name before you submit.** At the time of writing no model is connected. Morrow reads `MODEL_BASE_URL`, `MODEL_NAME` and `MODEL_API_KEY` (any OpenAI-compatible endpoint, which fits the hackathon gateway once credits are approved). Without them it runs "rules only", where the code's own smallest plan is accepted, and every log line says "rules only" so it is never mistaken for a model.
+**You need to fill in the model name before you submit.** At the time of writing no model is connected. Morrow reads `MODEL_BASE_URL`, `MODEL_NAME` and `MODEL_API_KEY` (any chat-completions endpoint, which fits the hackathon gateway once credits are approved). Without them it runs "rules only", where the code's own smallest plan is accepted, and every log line says "rules only" so it is never mistaken for a model.
 
 What the model decides: for a loan that is projected near its margin-call level, one of none, alert, pay down or add backing, and one plain sentence for the user. It is shown the projected loan health, the price trust result, the move since the close, the stock's historical reopening drop, the code's smallest plan, the actions the user allows, and the latest Bitget announcements.
 

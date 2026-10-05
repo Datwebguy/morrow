@@ -85,7 +85,7 @@ describe("advisor", () => {
     expect(parseChoice('{"action":"sell","reason":"x"}', "m").action).toBe("alert");
     expect(parseChoice('{"action":"none","reason":""}', "m").action).toBe("alert");
   });
-  it("calls an OpenAI-compatible endpoint", async () => {
+  it("calls a chat-completions endpoint", async () => {
     let seen = "";
     const a = modelAdvisor({ baseUrl: "https://x.test/v1/", model: "m1", apiKey: "k" }, async (url, init) => {
       seen = url + init.body;
