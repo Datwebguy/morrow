@@ -8,3 +8,4 @@ coverage
 *.db
 *.log
 .cache
+next-env.d.ts

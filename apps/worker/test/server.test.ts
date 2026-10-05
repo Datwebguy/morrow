@@ -59,6 +59,20 @@ describe("worker server", () => {
     expect(body.loans[0].projection.basis).toBe("history_case");
     expect(body.loans[0].trust).toBeDefined();
   });
+  it("disconnect pauses, stops protecting and cuts the connection; connect restores it", async () => {
+    const { w, base } = await start("secret");
+    const h = { authorization: "Bearer secret", "content-type": "application/json" };
+    updateSettings(w.store, { protectedLoans: ["L1"] });
+    const d = await fetch(`${base}/api/disconnect`, { method: "POST", headers: h, body: "{}" });
+    expect((await d.json()).ok).toBe(true);
+    const status = await (await fetch(`${base}/api/status`, { headers: h })).json();
+    expect(status.connected).toBe(false);
+    expect(status.settings.paused).toBe(true);
+    expect(status.settings.protectedLoans).toEqual([]);
+    const c = await fetch(`${base}/api/connect`, { method: "POST", headers: h, body: "{}" });
+    expect(c.status).toBe(200);
+    expect((await (await fetch(`${base}/api/status`, { headers: h })).json()).connected).toBe(true);
+  });
   it("answers an unknown route with 404", async () => {
     const { base } = await start("secret");
     expect((await fetch(`${base}/nope`)).status).toBe(404);

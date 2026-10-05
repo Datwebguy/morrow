@@ -12,8 +12,11 @@ export interface ServerDeps extends ApproveDeps {
   appToken: string | null;
   /** The one origin allowed to call private routes. */
   allowedOrigin: string | null;
+  /** True when Bitget credentials exist on the server. Whether the user has connected is a separate switch. */
   connected: boolean;
 }
+
+const DISCONNECTED = "disconnected";
 
 function send(res: ServerResponse, status: number, body: unknown, headers: Record<string, string> = {}): void {
   res.writeHead(status, { "content-type": "application/json", "cache-control": "no-store", ...headers });
@@ -80,7 +83,22 @@ export function createServer(d: ServerDeps): Server {
       const cors = { "access-control-allow-origin": d.allowedOrigin ?? "*" };
 
       if (req.method === "GET" && path === "/api/status") {
-        return send(res, 200, { connected: d.connected, liveActions: d.liveActions, now: d.ports.nowMs(), calendar: d.store.getSetting("calendar_check"), settings: loadSettings(d.store), pendingApprovals: d.store.pendingApprovals().length }, cors);
+        return send(res, 200, { connected: d.connected && d.store.getSetting<boolean>(DISCONNECTED) !== true, keysOnServer: d.connected, liveActions: d.liveActions, now: d.ports.nowMs(), calendar: d.store.getSetting("calendar_check"), settings: loadSettings(d.store), pendingApprovals: d.store.pendingApprovals().length }, cors);
+      }
+      if (req.method === "POST" && path === "/api/connect") {
+        if (!d.connected) return send(res, 409, { ok: false, line: "No Bitget connection is set up on the Morrow server yet." }, cors);
+        d.store.setSetting(DISCONNECTED, false);
+        loansCache = null;
+        const read = await d.ports.loans();
+        if (read.problems.length > 0 && read.loans.length === 0) return send(res, 409, { ok: false, line: read.problems[0] }, cors);
+        return send(res, 200, { ok: true, line: `Connected. ${read.loans.length === 0 ? "No open loans found." : `${read.loans.length} open loan${read.loans.length === 1 ? "" : "s"} found.`}` }, cors);
+      }
+      if (req.method === "POST" && path === "/api/disconnect") {
+        // Stops everything: pause, stop protecting every loan, and cut the connection to Bitget.
+        updateSettings(d.store, { paused: true, protectedLoans: [] });
+        d.store.setSetting(DISCONNECTED, true);
+        loansCache = null;
+        return send(res, 200, { ok: true, line: "Disconnected. Morrow stopped and will not touch your account." }, cors);
       }
       if (req.method === "GET" && path === "/api/loans") {
         if (loansCache && Date.now() - loansCache.at < 15_000) return send(res, 200, loansCache.body, cors);

@@ -10,7 +10,7 @@ import { createServer } from "./server";
 const env = process.env;
 const store = new Store(env["DATABASE_PATH"] ?? "morrow.db");
 const keys = keysFromEnv(env);
-const ports = livePorts({ keys, telegramToken: env["TELEGRAM_BOT_TOKEN"] });
+const ports = livePorts({ keys, telegramToken: env["TELEGRAM_BOT_TOKEN"], isDisconnected: () => store.getSetting<boolean>("disconnected") === true });
 const advisor: Advisor =
   env["MODEL_BASE_URL"] && env["MODEL_NAME"] && env["MODEL_API_KEY"]
     ? modelAdvisor({ baseUrl: env["MODEL_BASE_URL"], model: env["MODEL_NAME"], apiKey: env["MODEL_API_KEY"] })

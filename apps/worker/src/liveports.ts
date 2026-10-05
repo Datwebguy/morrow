@@ -49,13 +49,24 @@ async function announcementTitles(): Promise<string[]> {
 
 export interface LiveOptions {
   keys: Keys | null;
+  /** True after the user pressed Disconnect. Reads and writes stop until they connect again. */
+  isDisconnected?: () => boolean;
   telegramToken: string | undefined;
   transport?: Transport;
 }
 
 /** The real thing: Bitget account and market over the official SDK. Without keys, loans and balances read as empty with a reason. */
 export function livePorts(o: LiveOptions): Ports {
-  const transport = o.transport ?? (o.keys ? sdkTransport(o.keys) : null);
+  const real = o.transport ?? (o.keys ? sdkTransport(o.keys) : null);
+  const disconnected = (): boolean => o.isDisconnected?.() === true;
+  const transport: Transport | null = real
+    ? {
+        async call(op, args) {
+          if (disconnected()) throw new Error("Bitget is disconnected.");
+          return real.call(op, args);
+        },
+      }
+    : null;
   const exec = new MorrowBitget(
     transport ?? {
       async call() {
@@ -68,7 +79,7 @@ export function livePorts(o: LiveOptions): Ports {
     nowMs: () => Date.now(),
     simulated: false,
     async loans(): Promise<LoanRead> {
-      if (!transport) return { loans: [], problems: ["Bitget is not connected yet."] };
+      if (!transport || disconnected()) return { loans: [], problems: ["Bitget is not connected."] };
       try {
         return parseLoans(await exec.ongoingLoans());
       } catch (e) {
@@ -76,7 +87,7 @@ export function livePorts(o: LiveOptions): Ports {
       }
     },
     async idleBalances(): Promise<Balances> {
-      if (!transport) return { byCoin: null, problem: "Bitget is not connected yet." };
+      if (!transport || disconnected()) return { byCoin: null, problem: "Bitget is not connected." };
       try {
         return parseBalances(await exec.read("getAccountAssets"));
       } catch (e) {
