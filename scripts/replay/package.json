@@ -1,0 +1,16 @@
+{
+  "name": "@morrow/replay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "tsc --noEmit -p tsconfig.json",
+    "replay": "tsx src/run.ts"
+  },
+  "dependencies": {
+    "@morrow/bitget": "*",
+    "@morrow/config": "*",
+    "@morrow/core": "*"
+  }
+}

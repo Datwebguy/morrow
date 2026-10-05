@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { quantile, reopenGaps, reopenRisk, type Candle, type Closure } from "../src";
 
 const H = 3_600_000; // test fixture: one hour in ms
+const opts = { hourMs: H, minCoverage: 0.5 };
 
 function candle(t: number, open: number, close: number): Candle {
   return { t, open, close, high: Math.max(open, close), low: Math.min(open, close) };
@@ -23,24 +24,37 @@ describe("reopenGaps", () => {
   const closure: Closure = { closeTs: 10 * H, reopenTs: 60 * H };
   it("measures close to reopen for a token that pauses", () => {
     const candles = [candle(9 * H, 100, 100), candle(60 * H, 95, 96)];
-    const g = reopenGaps(candles, [closure]);
+    const g = reopenGaps(candles, [closure], opts);
     expect(g).toHaveLength(1);
     expect(g[0]!.move).toBeCloseTo(-0.05);
     expect(g[0]!.tradedDuringClosure).toBe(false);
   });
-  it("marks tokens that trade during the closure", () => {
-    const candles = [candle(9 * H, 100, 100), candle(30 * H, 99, 98), candle(60 * H, 97, 97)];
-    expect(reopenGaps(candles, [closure])[0]!.tradedDuringClosure).toBe(true);
+  it("does not call a token a weekend trader because of a few extended-hours candles", () => {
+    const candles = [candle(9 * H, 100, 100), candle(10 * H, 99, 98), candle(11 * H, 99, 98), candle(59 * H, 99, 98), candle(60 * H, 97, 97)];
+    const g = reopenGaps(candles, [closure], opts)[0]!;
+    expect(g.tradedDuringClosure).toBe(false);
+    expect(g.coverage).toBeCloseTo(3 / 50);
+  });
+  it("marks tokens that trade through most of the closure", () => {
+    const candles = [candle(9 * H, 100, 100), ...Array.from({ length: 40 }, (_, i) => candle((12 + i) * H, 99, 98)), candle(60 * H, 97, 97)];
+    const g = reopenGaps(candles, [closure], opts)[0]!;
+    expect(g.tradedDuringClosure).toBe(true);
+    expect(g.coverage).toBeCloseTo(0.8);
+  });
+  it("ignores candles with no volume", () => {
+    const quiet = Array.from({ length: 40 }, (_, i) => ({ ...candle((12 + i) * H, 99, 98), volume: 0 }));
+    const g = reopenGaps([candle(9 * H, 100, 100), ...quiet, candle(60 * H, 97, 97)], [closure], opts)[0]!;
+    expect(g.tradedDuringClosure).toBe(false);
   });
   it("skips a closure with no candle on one side instead of guessing", () => {
-    expect(reopenGaps([candle(9 * H, 100, 100)], [closure])).toHaveLength(0);
-    expect(reopenGaps([candle(60 * H, 100, 100)], [closure])).toHaveLength(0);
+    expect(reopenGaps([candle(9 * H, 100, 100)], [closure], opts)).toHaveLength(0);
+    expect(reopenGaps([candle(60 * H, 100, 100)], [closure], opts)).toHaveLength(0);
   });
   it("skips bad prices", () => {
-    expect(reopenGaps([candle(9 * H, 0, 0), candle(60 * H, 1, 1)], [closure])).toHaveLength(0);
+    expect(reopenGaps([candle(9 * H, 0, 0), candle(60 * H, 1, 1)], [closure], opts)).toHaveLength(0);
   });
   it("handles a huge gap", () => {
-    const g = reopenGaps([candle(9 * H, 100, 100), candle(60 * H, 40, 40)], [closure]);
+    const g = reopenGaps([candle(9 * H, 100, 100), candle(60 * H, 40, 40)], [closure], opts);
     expect(g[0]!.move).toBeCloseTo(-0.6);
   });
 });
@@ -48,7 +62,7 @@ describe("reopenGaps", () => {
 describe("reopenRisk", () => {
   const moves = Array.from({ length: 100 }, (_, i) => (i - 90) / 1000); // -0.09 .. +0.009
   const gaps = moves.map((m, i) => ({
-    closeTs: i, reopenTs: i + 1, closePrice: 100, openPrice: 100 * (1 + m), move: m, tradedDuringClosure: i % 2 === 0,
+    closeTs: i, reopenTs: i + 1, closePrice: 100, openPrice: 100 * (1 + m), move: m, tradedDuringClosure: i % 2 === 0, coverage: 0.5,
   }));
   it("returns null with too little history", () => {
     expect(reopenRisk(gaps.slice(0, 5), [95, 99], 20)).toBeNull();

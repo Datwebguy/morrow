@@ -6,7 +6,13 @@ export type Fetch = (url: string) => Promise<{ ok: boolean; status: number; json
 export interface MarketOptions {
   fetch?: Fetch;
   baseUrl?: string;
+  /** Pause between retries in ms. Tests set it to 0. */
+  retryDelayMs?: number;
 }
+
+/** Retries for rate limits and server errors: 5 tries, doubling the pause each time. */
+const MAX_TRIES = 5;
+const FIRST_RETRY_DELAY_MS = 400;
 
 export class BitgetDataError extends Error {
   constructor(message: string) {
@@ -34,7 +40,13 @@ function arr(value: unknown, what: string): unknown[] {
 async function getData(path: string, query: Record<string, string | number>, o: MarketOptions): Promise<unknown> {
   const f: Fetch = o.fetch ?? ((url) => fetch(url));
   const qs = new URLSearchParams(Object.entries(query).map(([k, v]) => [k, String(v)])).toString();
-  const res = await f(`${o.baseUrl ?? BITGET_BASE_URL}${path}${qs ? `?${qs}` : ""}`);
+  const url = `${o.baseUrl ?? BITGET_BASE_URL}${path}${qs ? `?${qs}` : ""}`;
+  let res = await f(url);
+  for (let attempt = 1; !res.ok && (res.status === 429 || res.status >= 500) && attempt < MAX_TRIES; attempt++) {
+    const wait = (o.retryDelayMs ?? FIRST_RETRY_DELAY_MS) * 2 ** (attempt - 1);
+    await new Promise((r) => setTimeout(r, wait));
+    res = await f(url);
+  }
   if (!res.ok) throw new BitgetDataError(`Bitget answered with status ${res.status}`);
   const body = obj(await res.json(), "response");
   if (body["code"] !== "00000") throw new BitgetDataError(`Bitget refused the request: ${String(body["msg"] ?? "no reason given")}`);
@@ -150,7 +162,10 @@ export async function fetchOrderBook(symbol: string, limit: number, o: MarketOpt
 
 function parseCandle(x: unknown): Candle {
   const r = arr(x, "candle");
-  return { t: num(r[0], "t"), open: num(r[1], "open"), high: num(r[2], "high"), low: num(r[3], "low"), close: num(r[4], "close") };
+  return {
+    t: num(r[0], "t"), open: num(r[1], "open"), high: num(r[2], "high"), low: num(r[3], "low"), close: num(r[4], "close"),
+    volume: num(r[5], "volume"),
+  };
 }
 
 /** Largest page Bitget returns for hourly history. Source: Bitget history-candles docs (limit up to 200). */

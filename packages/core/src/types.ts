@@ -1,5 +1,7 @@
 /** One hourly candle. `t` is the candle start in milliseconds. */
 export interface Candle {
+  /** Traded volume in the backing token, when the source gives it. */
+  volume?: number;
   t: number;
   open: number;
   high: number;

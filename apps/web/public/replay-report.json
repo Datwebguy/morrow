@@ -1,0 +1,2283 @@
+{
+  "label": "simulated",
+  "note": "Prices are real Bitget hourly prices. Every loan in this report is simulated.",
+  "caveats": [
+    "A simulated loan that starts at or above the trigger level is paid down at the start of every closure, whatever the weekend does. Read the 65% rows for protection against weekend risk alone; the 70% and 74% rows mostly show the cost of holding a loan that close to the margin-call level.",
+    "The replay trust check uses traded volume and move size from hourly candles. The live check also uses spread, depth and last-trade age, which are not available for past hours.",
+    "Closures start on 1 January 2026, the first year the stored official calendar covers. The number of closures behind each figure is shown with it."
+  ],
+  "generatedAt": "2026-10-05T09:00:00.000Z",
+  "calendar": {
+    "source": "https://www.nyse.com/trade/hours-calendars",
+    "fetchedAt": "2026-10-05T08:50:42.174Z"
+  },
+  "tokens": 185,
+  "closures": 40,
+  "historyFrom": "2025-12-29T00:00:00Z",
+  "outOfSampleFrom": "2026-08-24T09:00:00.000Z",
+  "liveLimits": [
+    "0.65/0.75/0.91"
+  ],
+  "usdtHourlyRate": 0.00000334,
+  "simulatedLoan": {
+    "backingValueUsdt": 10000,
+    "startLtvs": [
+      0.65,
+      0.7,
+      0.74
+    ],
+    "idleFractionMain": 0.25
+  },
+  "chosen": {
+    "planningPercentile": 95,
+    "triggerBufferPoints": 5
+  },
+  "grid": [
+    {
+      "planningPercentile": 95,
+      "triggerBufferPoints": 0,
+      "train": {
+        "all": {
+          "loans": 15102,
+          "baselineMarginCalls": 1249,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 123,
+          "morrowLiquidations": 0,
+          "usdtUsed": 4952734.779779392,
+          "totalDebt": 105210600,
+          "interestSaved": 1158.5291614441537,
+          "loansActedOn": 4444
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 7551,
+            "baselineMarginCalls": 735,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 67,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2476367.3898896934,
+            "totalDebt": 52605300,
+            "interestSaved": 579.2645807220796,
+            "loansActedOn": 2222
+          },
+          "last_close": {
+            "loans": 7551,
+            "baselineMarginCalls": 514,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 56,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2476367.3898896934,
+            "totalDebt": 52605300,
+            "interestSaved": 579.2645807220796,
+            "loansActedOn": 2222
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 5034,
+            "baselineMarginCalls": 11,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 9,
+            "morrowLiquidations": 0,
+            "usdtUsed": 10172.672455992266,
+            "totalDebt": 32721000,
+            "interestSaved": 2.208487190195921,
+            "loansActedOn": 10
+          },
+          "0.7": {
+            "loans": 5034,
+            "baselineMarginCalls": 87,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 56,
+            "morrowLiquidations": 0,
+            "usdtUsed": 274976.9660381554,
+            "totalDebt": 35238000,
+            "interestSaved": 64.63110038613331,
+            "loansActedOn": 260
+          },
+          "0.74": {
+            "loans": 5034,
+            "baselineMarginCalls": 1151,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 58,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4667585.141285231,
+            "totalDebt": 37251600,
+            "interestSaved": 1091.6895738678234,
+            "loansActedOn": 4174
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 5,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5086.336227996133,
+            "totalDebt": 16360500,
+            "interestSaved": 1.1042435950979606,
+            "loansActedOn": 5
+          },
+          "last_close@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 5,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 4,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5086.336227996133,
+            "totalDebt": 16360500,
+            "interestSaved": 1.1042435950979606,
+            "loansActedOn": 5
+          },
+          "live_price@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 28,
+            "morrowLiquidations": 0,
+            "usdtUsed": 137488.48301907777,
+            "totalDebt": 17619000,
+            "interestSaved": 32.31555019306666,
+            "loansActedOn": 130
+          },
+          "last_close@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 42,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 28,
+            "morrowLiquidations": 0,
+            "usdtUsed": 137488.48301907777,
+            "totalDebt": 17619000,
+            "interestSaved": 32.31555019306666,
+            "loansActedOn": 130
+          },
+          "live_price@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 684,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 34,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2333792.5706426227,
+            "totalDebt": 18625800,
+            "interestSaved": 545.8447869339149,
+            "loansActedOn": 2087
+          },
+          "last_close@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 467,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 24,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2333792.5706426227,
+            "totalDebt": 18625800,
+            "interestSaved": 545.8447869339149,
+            "loansActedOn": 2087
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 15102,
+            "baselineMarginCalls": 1249,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 123,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4952734.779779392,
+            "totalDebt": 105210600,
+            "interestSaved": 1158.5291614441537,
+            "loansActedOn": 4444
+          }
+        },
+        "closures": 14,
+        "tokens": 182
+      }
+    },
+    {
+      "planningPercentile": 95,
+      "triggerBufferPoints": 3,
+      "train": {
+        "all": {
+          "loans": 15102,
+          "baselineMarginCalls": 1249,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 10,
+          "morrowLiquidations": 0,
+          "usdtUsed": 7085216.414993903,
+          "totalDebt": 105210600,
+          "interestSaved": 1657.8039593049184,
+          "loansActedOn": 6992
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 7551,
+            "baselineMarginCalls": 735,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 5,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3542608.207496942,
+            "totalDebt": 52605300,
+            "interestSaved": 828.9019796524608,
+            "loansActedOn": 3496
+          },
+          "last_close": {
+            "loans": 7551,
+            "baselineMarginCalls": 514,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 5,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3542608.207496942,
+            "totalDebt": 52605300,
+            "interestSaved": 828.9019796524608,
+            "loansActedOn": 3496
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 5034,
+            "baselineMarginCalls": 11,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 6,
+            "morrowLiquidations": 0,
+            "usdtUsed": 35455.7464148265,
+            "totalDebt": 32721000,
+            "interestSaved": 7.962609440003948,
+            "loansActedOn": 42
+          },
+          "0.7": {
+            "loans": 5034,
+            "baselineMarginCalls": 87,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 4,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1561231.000671038,
+            "totalDebt": 35238000,
+            "interestSaved": 364.76355536408664,
+            "loansActedOn": 1916
+          },
+          "0.74": {
+            "loans": 5034,
+            "baselineMarginCalls": 1151,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5488529.667908021,
+            "totalDebt": 37251600,
+            "interestSaved": 1285.0777945008258,
+            "loansActedOn": 5034
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 3,
+            "morrowLiquidations": 0,
+            "usdtUsed": 17727.873207413257,
+            "totalDebt": 16360500,
+            "interestSaved": 3.9813047200019747,
+            "loansActedOn": 21
+          },
+          "last_close@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 5,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 3,
+            "morrowLiquidations": 0,
+            "usdtUsed": 17727.873207413257,
+            "totalDebt": 16360500,
+            "interestSaved": 3.9813047200019747,
+            "loansActedOn": 21
+          },
+          "live_price@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 2,
+            "morrowLiquidations": 0,
+            "usdtUsed": 780615.5003355223,
+            "totalDebt": 17619000,
+            "interestSaved": 182.38177768204292,
+            "loansActedOn": 958
+          },
+          "last_close@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 42,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 2,
+            "morrowLiquidations": 0,
+            "usdtUsed": 780615.5003355223,
+            "totalDebt": 17619000,
+            "interestSaved": 182.38177768204292,
+            "loansActedOn": 958
+          },
+          "live_price@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 684,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2744264.833954008,
+            "totalDebt": 18625800,
+            "interestSaved": 642.5388972504157,
+            "loansActedOn": 2517
+          },
+          "last_close@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 467,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2744264.833954008,
+            "totalDebt": 18625800,
+            "interestSaved": 642.5388972504157,
+            "loansActedOn": 2517
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 15102,
+            "baselineMarginCalls": 1249,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 10,
+            "morrowLiquidations": 0,
+            "usdtUsed": 7085216.414993903,
+            "totalDebt": 105210600,
+            "interestSaved": 1657.8039593049184,
+            "loansActedOn": 6992
+          }
+        },
+        "closures": 14,
+        "tokens": 182
+      }
+    },
+    {
+      "planningPercentile": 95,
+      "triggerBufferPoints": 5,
+      "train": {
+        "all": {
+          "loans": 15102,
+          "baselineMarginCalls": 1249,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 0,
+          "morrowLiquidations": 0,
+          "usdtUsed": 9075042.655575903,
+          "totalDebt": 105210600,
+          "interestSaved": 2124.53118111004,
+          "loansActedOn": 10252
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 7551,
+            "baselineMarginCalls": 735,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4537521.32778791,
+            "totalDebt": 52605300,
+            "interestSaved": 1062.265590555018,
+            "loansActedOn": 5126
+          },
+          "last_close": {
+            "loans": 7551,
+            "baselineMarginCalls": 514,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4537521.32778791,
+            "totalDebt": 52605300,
+            "interestSaved": 1062.265590555018,
+            "loansActedOn": 5126
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 5034,
+            "baselineMarginCalls": 11,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 110910.64730381622,
+            "totalDebt": 32721000,
+            "interestSaved": 25.81885091818188,
+            "loansActedOn": 184
+          },
+          "0.7": {
+            "loans": 5034,
+            "baselineMarginCalls": 87,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3475602.340364008,
+            "totalDebt": 35238000,
+            "interestSaved": 813.6345356910294,
+            "loansActedOn": 5034
+          },
+          "0.74": {
+            "loans": 5034,
+            "baselineMarginCalls": 1151,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5488529.667908021,
+            "totalDebt": 37251600,
+            "interestSaved": 1285.0777945008258,
+            "loansActedOn": 5034
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 55455.323651908126,
+            "totalDebt": 16360500,
+            "interestSaved": 12.909425459090935,
+            "loansActedOn": 92
+          },
+          "last_close@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 5,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 55455.323651908126,
+            "totalDebt": 16360500,
+            "interestSaved": 12.909425459090935,
+            "loansActedOn": 92
+          },
+          "live_price@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1737801.1701820048,
+            "totalDebt": 17619000,
+            "interestSaved": 406.8172678455146,
+            "loansActedOn": 2517
+          },
+          "last_close@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 42,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1737801.1701820048,
+            "totalDebt": 17619000,
+            "interestSaved": 406.8172678455146,
+            "loansActedOn": 2517
+          },
+          "live_price@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 684,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2744264.833954008,
+            "totalDebt": 18625800,
+            "interestSaved": 642.5388972504157,
+            "loansActedOn": 2517
+          },
+          "last_close@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 467,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2744264.833954008,
+            "totalDebt": 18625800,
+            "interestSaved": 642.5388972504157,
+            "loansActedOn": 2517
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 15102,
+            "baselineMarginCalls": 1249,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 9075042.655575903,
+            "totalDebt": 105210600,
+            "interestSaved": 2124.53118111004,
+            "loansActedOn": 10252
+          }
+        },
+        "closures": 14,
+        "tokens": 182
+      }
+    },
+    {
+      "planningPercentile": 95,
+      "triggerBufferPoints": 10,
+      "train": {
+        "all": {
+          "loans": 15102,
+          "baselineMarginCalls": 1249,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 0,
+          "morrowLiquidations": 0,
+          "usdtUsed": 9922734.348636111,
+          "totalDebt": 105210600,
+          "interestSaved": 2322.8602458828755,
+          "loansActedOn": 15102
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 7551,
+            "baselineMarginCalls": 735,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4961367.174317996,
+            "totalDebt": 52605300,
+            "interestSaved": 1161.4301229414405,
+            "loansActedOn": 7551
+          },
+          "last_close": {
+            "loans": 7551,
+            "baselineMarginCalls": 514,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4961367.174317996,
+            "totalDebt": 52605300,
+            "interestSaved": 1161.4301229414405,
+            "loansActedOn": 7551
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 5034,
+            "baselineMarginCalls": 11,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 958602.340364017,
+            "totalDebt": 32721000,
+            "interestSaved": 224.14791569102718,
+            "loansActedOn": 5034
+          },
+          "0.7": {
+            "loans": 5034,
+            "baselineMarginCalls": 87,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3475602.340364008,
+            "totalDebt": 35238000,
+            "interestSaved": 813.6345356910294,
+            "loansActedOn": 5034
+          },
+          "0.74": {
+            "loans": 5034,
+            "baselineMarginCalls": 1151,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5488529.667908021,
+            "totalDebt": 37251600,
+            "interestSaved": 1285.0777945008258,
+            "loansActedOn": 5034
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 479301.17018200713,
+            "totalDebt": 16360500,
+            "interestSaved": 112.07395784551407,
+            "loansActedOn": 2517
+          },
+          "last_close@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 5,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 479301.17018200713,
+            "totalDebt": 16360500,
+            "interestSaved": 112.07395784551407,
+            "loansActedOn": 2517
+          },
+          "live_price@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1737801.1701820048,
+            "totalDebt": 17619000,
+            "interestSaved": 406.8172678455146,
+            "loansActedOn": 2517
+          },
+          "last_close@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 42,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1737801.1701820048,
+            "totalDebt": 17619000,
+            "interestSaved": 406.8172678455146,
+            "loansActedOn": 2517
+          },
+          "live_price@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 684,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2744264.833954008,
+            "totalDebt": 18625800,
+            "interestSaved": 642.5388972504157,
+            "loansActedOn": 2517
+          },
+          "last_close@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 467,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2744264.833954008,
+            "totalDebt": 18625800,
+            "interestSaved": 642.5388972504157,
+            "loansActedOn": 2517
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 15102,
+            "baselineMarginCalls": 1249,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 9922734.348636111,
+            "totalDebt": 105210600,
+            "interestSaved": 2322.8602458828755,
+            "loansActedOn": 15102
+          }
+        },
+        "closures": 14,
+        "tokens": 182
+      }
+    },
+    {
+      "planningPercentile": 99,
+      "triggerBufferPoints": 0,
+      "train": {
+        "all": {
+          "loans": 15102,
+          "baselineMarginCalls": 1249,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 57,
+          "morrowLiquidations": 0,
+          "usdtUsed": 6399037.071123533,
+          "totalDebt": 105210600,
+          "interestSaved": 1497.3973920998203,
+          "loansActedOn": 5492
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 7551,
+            "baselineMarginCalls": 735,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 32,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3199518.535561743,
+            "totalDebt": 52605300,
+            "interestSaved": 748.6986960499095,
+            "loansActedOn": 2746
+          },
+          "last_close": {
+            "loans": 7551,
+            "baselineMarginCalls": 514,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 25,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3199518.535561743,
+            "totalDebt": 52605300,
+            "interestSaved": 748.6986960499095,
+            "loansActedOn": 2746
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 5034,
+            "baselineMarginCalls": 11,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 4,
+            "morrowLiquidations": 0,
+            "usdtUsed": 100332.9655004353,
+            "totalDebt": 32721000,
+            "interestSaved": 23.34299488986209,
+            "loansActedOn": 92
+          },
+          "0.7": {
+            "loans": 5034,
+            "baselineMarginCalls": 87,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 34,
+            "morrowLiquidations": 0,
+            "usdtUsed": 870652.6091454595,
+            "totalDebt": 35238000,
+            "interestSaved": 203.59628206864264,
+            "loansActedOn": 796
+          },
+          "0.74": {
+            "loans": 5034,
+            "baselineMarginCalls": 1151,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 19,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5428051.496477611,
+            "totalDebt": 37251600,
+            "interestSaved": 1270.4581151413174,
+            "loansActedOn": 4604
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 2,
+            "morrowLiquidations": 0,
+            "usdtUsed": 50166.48275021762,
+            "totalDebt": 16360500,
+            "interestSaved": 11.671497444931049,
+            "loansActedOn": 46
+          },
+          "last_close@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 5,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 2,
+            "morrowLiquidations": 0,
+            "usdtUsed": 50166.48275021762,
+            "totalDebt": 16360500,
+            "interestSaved": 11.671497444931049,
+            "loansActedOn": 46
+          },
+          "live_price@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 17,
+            "morrowLiquidations": 0,
+            "usdtUsed": 435326.30457273044,
+            "totalDebt": 17619000,
+            "interestSaved": 101.79814103432142,
+            "loansActedOn": 398
+          },
+          "last_close@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 42,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 17,
+            "morrowLiquidations": 0,
+            "usdtUsed": 435326.30457273044,
+            "totalDebt": 17619000,
+            "interestSaved": 101.79814103432142,
+            "loansActedOn": 398
+          },
+          "live_price@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 684,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 13,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2714025.748238801,
+            "totalDebt": 18625800,
+            "interestSaved": 635.2290575706564,
+            "loansActedOn": 2302
+          },
+          "last_close@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 467,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 6,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2714025.748238801,
+            "totalDebt": 18625800,
+            "interestSaved": 635.2290575706564,
+            "loansActedOn": 2302
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 15102,
+            "baselineMarginCalls": 1249,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 57,
+            "morrowLiquidations": 0,
+            "usdtUsed": 6399037.071123533,
+            "totalDebt": 105210600,
+            "interestSaved": 1497.3973920998203,
+            "loansActedOn": 5492
+          }
+        },
+        "closures": 14,
+        "tokens": 182
+      }
+    },
+    {
+      "planningPercentile": 99,
+      "triggerBufferPoints": 3,
+      "train": {
+        "all": {
+          "loans": 15102,
+          "baselineMarginCalls": 1249,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 2,
+          "morrowLiquidations": 0,
+          "usdtUsed": 8704467.099787988,
+          "totalDebt": 105210600,
+          "interestSaved": 2036.4473287095082,
+          "loansActedOn": 8412
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 7551,
+            "baselineMarginCalls": 735,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4352233.549893965,
+            "totalDebt": 52605300,
+            "interestSaved": 1018.2236643547518,
+            "loansActedOn": 4206
+          },
+          "last_close": {
+            "loans": 7551,
+            "baselineMarginCalls": 514,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4352233.549893965,
+            "totalDebt": 52605300,
+            "interestSaved": 1018.2236643547518,
+            "loansActedOn": 4206
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 5034,
+            "baselineMarginCalls": 11,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 2,
+            "morrowLiquidations": 0,
+            "usdtUsed": 184049.08615511455,
+            "totalDebt": 32721000,
+            "interestSaved": 42.81794671122673,
+            "loansActedOn": 208
+          },
+          "0.7": {
+            "loans": 5034,
+            "baselineMarginCalls": 87,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2685891.18107973,
+            "totalDebt": 35238000,
+            "interestSaved": 627.6522929930786,
+            "loansActedOn": 3170
+          },
+          "0.74": {
+            "loans": 5034,
+            "baselineMarginCalls": 1151,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5834526.832553105,
+            "totalDebt": 37251600,
+            "interestSaved": 1365.9770890052046,
+            "loansActedOn": 5034
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 92024.54307755735,
+            "totalDebt": 16360500,
+            "interestSaved": 21.40897335561336,
+            "loansActedOn": 104
+          },
+          "last_close@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 5,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 92024.54307755735,
+            "totalDebt": 16360500,
+            "interestSaved": 21.40897335561336,
+            "loansActedOn": 104
+          },
+          "live_price@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1342945.5905398654,
+            "totalDebt": 17619000,
+            "interestSaved": 313.8261464965401,
+            "loansActedOn": 1585
+          },
+          "last_close@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 42,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1342945.5905398654,
+            "totalDebt": 17619000,
+            "interestSaved": 313.8261464965401,
+            "loansActedOn": 1585
+          },
+          "live_price@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 684,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2917263.416276545,
+            "totalDebt": 18625800,
+            "interestSaved": 682.988544502599,
+            "loansActedOn": 2517
+          },
+          "last_close@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 467,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2917263.416276545,
+            "totalDebt": 18625800,
+            "interestSaved": 682.988544502599,
+            "loansActedOn": 2517
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 15102,
+            "baselineMarginCalls": 1249,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 2,
+            "morrowLiquidations": 0,
+            "usdtUsed": 8704467.099787988,
+            "totalDebt": 105210600,
+            "interestSaved": 2036.4473287095082,
+            "loansActedOn": 8412
+          }
+        },
+        "closures": 14,
+        "tokens": 182
+      }
+    },
+    {
+      "planningPercentile": 99,
+      "triggerBufferPoints": 5,
+      "train": {
+        "all": {
+          "loans": 15102,
+          "baselineMarginCalls": 1249,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 0,
+          "morrowLiquidations": 0,
+          "usdtUsed": 10071839.345268717,
+          "totalDebt": 105210600,
+          "interestSaved": 2357.4675634422097,
+          "loansActedOn": 10706
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 7551,
+            "baselineMarginCalls": 735,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5035919.6726343185,
+            "totalDebt": 52605300,
+            "interestSaved": 1178.7337817211055,
+            "loansActedOn": 5353
+          },
+          "last_close": {
+            "loans": 7551,
+            "baselineMarginCalls": 514,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5035919.6726343185,
+            "totalDebt": 52605300,
+            "interestSaved": 1178.7337817211055,
+            "loansActedOn": 5353
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 5034,
+            "baselineMarginCalls": 11,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 405550.6086301694,
+            "totalDebt": 32721000,
+            "interestSaved": 94.60247699266588,
+            "loansActedOn": 638
+          },
+          "0.7": {
+            "loans": 5034,
+            "baselineMarginCalls": 87,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3831761.9040853498,
+            "totalDebt": 35238000,
+            "interestSaved": 896.8879974443416,
+            "loansActedOn": 5034
+          },
+          "0.74": {
+            "loans": 5034,
+            "baselineMarginCalls": 1151,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5834526.832553105,
+            "totalDebt": 37251600,
+            "interestSaved": 1365.9770890052046,
+            "loansActedOn": 5034
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 202775.30431508465,
+            "totalDebt": 16360500,
+            "interestSaved": 47.30123849633295,
+            "loansActedOn": 319
+          },
+          "last_close@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 5,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 202775.30431508465,
+            "totalDebt": 16360500,
+            "interestSaved": 47.30123849633295,
+            "loansActedOn": 319
+          },
+          "live_price@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1915880.9520426765,
+            "totalDebt": 17619000,
+            "interestSaved": 448.44399872217247,
+            "loansActedOn": 2517
+          },
+          "last_close@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 42,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1915880.9520426765,
+            "totalDebt": 17619000,
+            "interestSaved": 448.44399872217247,
+            "loansActedOn": 2517
+          },
+          "live_price@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 684,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2917263.416276545,
+            "totalDebt": 18625800,
+            "interestSaved": 682.988544502599,
+            "loansActedOn": 2517
+          },
+          "last_close@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 467,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2917263.416276545,
+            "totalDebt": 18625800,
+            "interestSaved": 682.988544502599,
+            "loansActedOn": 2517
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 15102,
+            "baselineMarginCalls": 1249,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 10071839.345268717,
+            "totalDebt": 105210600,
+            "interestSaved": 2357.4675634422097,
+            "loansActedOn": 10706
+          }
+        },
+        "closures": 14,
+        "tokens": 182
+      }
+    },
+    {
+      "planningPercentile": 99,
+      "triggerBufferPoints": 10,
+      "train": {
+        "all": {
+          "loans": 15102,
+          "baselineMarginCalls": 1249,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 0,
+          "morrowLiquidations": 0,
+          "usdtUsed": 10984899.54213298,
+          "totalDebt": 105210600,
+          "interestSaved": 2571.1823952639747,
+          "loansActedOn": 15102
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 7551,
+            "baselineMarginCalls": 735,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5492449.771066449,
+            "totalDebt": 52605300,
+            "interestSaved": 1285.5911976319903,
+            "loansActedOn": 7551
+          },
+          "last_close": {
+            "loans": 7551,
+            "baselineMarginCalls": 514,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5492449.771066449,
+            "totalDebt": 52605300,
+            "interestSaved": 1285.5911976319903,
+            "loansActedOn": 7551
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 5034,
+            "baselineMarginCalls": 11,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1318610.8054944044,
+            "totalDebt": 32721000,
+            "interestSaved": 308.31730881444037,
+            "loansActedOn": 5034
+          },
+          "0.7": {
+            "loans": 5034,
+            "baselineMarginCalls": 87,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3831761.9040853498,
+            "totalDebt": 35238000,
+            "interestSaved": 896.8879974443416,
+            "loansActedOn": 5034
+          },
+          "0.74": {
+            "loans": 5034,
+            "baselineMarginCalls": 1151,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5834526.832553105,
+            "totalDebt": 37251600,
+            "interestSaved": 1365.9770890052046,
+            "loansActedOn": 5034
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 659305.4027472002,
+            "totalDebt": 16360500,
+            "interestSaved": 154.15865440721979,
+            "loansActedOn": 2517
+          },
+          "last_close@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 5,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 659305.4027472002,
+            "totalDebt": 16360500,
+            "interestSaved": 154.15865440721979,
+            "loansActedOn": 2517
+          },
+          "live_price@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1915880.9520426765,
+            "totalDebt": 17619000,
+            "interestSaved": 448.44399872217247,
+            "loansActedOn": 2517
+          },
+          "last_close@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 42,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1915880.9520426765,
+            "totalDebt": 17619000,
+            "interestSaved": 448.44399872217247,
+            "loansActedOn": 2517
+          },
+          "live_price@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 684,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2917263.416276545,
+            "totalDebt": 18625800,
+            "interestSaved": 682.988544502599,
+            "loansActedOn": 2517
+          },
+          "last_close@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 467,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2917263.416276545,
+            "totalDebt": 18625800,
+            "interestSaved": 682.988544502599,
+            "loansActedOn": 2517
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 15102,
+            "baselineMarginCalls": 1249,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 10984899.54213298,
+            "totalDebt": 105210600,
+            "interestSaved": 2571.1823952639747,
+            "loansActedOn": 15102
+          }
+        },
+        "closures": 14,
+        "tokens": 182
+      }
+    }
+  ],
+  "results": [
+    {
+      "idleFraction": 0.1,
+      "train": {
+        "all": {
+          "loans": 15102,
+          "baselineMarginCalls": 1249,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 24,
+          "morrowLiquidations": 0,
+          "usdtUsed": 7080985.60896763,
+          "totalDebt": 105210600,
+          "interestSaved": 1658.1289775878518,
+          "loansActedOn": 10252
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 7551,
+            "baselineMarginCalls": 735,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 12,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3540492.804483812,
+            "totalDebt": 52605300,
+            "interestSaved": 829.0644887939472,
+            "loansActedOn": 5126
+          },
+          "last_close": {
+            "loans": 7551,
+            "baselineMarginCalls": 514,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 12,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3540492.804483812,
+            "totalDebt": 52605300,
+            "interestSaved": 829.0644887939472,
+            "loansActedOn": 5126
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 5034,
+            "baselineMarginCalls": 11,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 102730.83276998263,
+            "totalDebt": 32721000,
+            "interestSaved": 23.98626228954145,
+            "loansActedOn": 184
+          },
+          "0.7": {
+            "loans": 5034,
+            "baselineMarginCalls": 87,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 4,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3253094.77619764,
+            "totalDebt": 35238000,
+            "interestSaved": 761.7025176983083,
+            "loansActedOn": 5034
+          },
+          "0.74": {
+            "loans": 5034,
+            "baselineMarginCalls": 1151,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 20,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3725160,
+            "totalDebt": 37251600,
+            "interestSaved": 872.4401976000437,
+            "loansActedOn": 5034
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 51365.41638499132,
+            "totalDebt": 16360500,
+            "interestSaved": 11.993131144770722,
+            "loansActedOn": 92
+          },
+          "last_close@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 5,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 51365.41638499132,
+            "totalDebt": 16360500,
+            "interestSaved": 11.993131144770722,
+            "loansActedOn": 92
+          },
+          "live_price@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 2,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1626547.3880988245,
+            "totalDebt": 17619000,
+            "interestSaved": 380.85125884915436,
+            "loansActedOn": 2517
+          },
+          "last_close@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 42,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 2,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1626547.3880988245,
+            "totalDebt": 17619000,
+            "interestSaved": 380.85125884915436,
+            "loansActedOn": 2517
+          },
+          "live_price@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 684,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 10,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1862580,
+            "totalDebt": 18625800,
+            "interestSaved": 436.22009880001553,
+            "loansActedOn": 2517
+          },
+          "last_close@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 467,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 10,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1862580,
+            "totalDebt": 18625800,
+            "interestSaved": 436.22009880001553,
+            "loansActedOn": 2517
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 15102,
+            "baselineMarginCalls": 1249,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 24,
+            "morrowLiquidations": 0,
+            "usdtUsed": 7080985.60896763,
+            "totalDebt": 105210600,
+            "interestSaved": 1658.1289775878518,
+            "loansActedOn": 10252
+          }
+        },
+        "closures": 14,
+        "tokens": 182
+      },
+      "outOfSample": {
+        "all": {
+          "loans": 6588,
+          "baselineMarginCalls": 752,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 15,
+          "morrowLiquidations": 0,
+          "usdtUsed": 3126632.3398333886,
+          "totalDebt": 45896400,
+          "interestSaved": 720.488284041245,
+          "loansActedOn": 4524
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 3294,
+            "baselineMarginCalls": 434,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 8,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1563316.1699166968,
+            "totalDebt": 22948200,
+            "interestSaved": 360.2441420206153,
+            "loansActedOn": 2262
+          },
+          "last_close": {
+            "loans": 3294,
+            "baselineMarginCalls": 318,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 7,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1563316.1699166968,
+            "totalDebt": 22948200,
+            "interestSaved": 360.2441420206153,
+            "loansActedOn": 2262
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 2196,
+            "baselineMarginCalls": 7,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 74317.06103856594,
+            "totalDebt": 14274000,
+            "interestSaved": 17.079291046315742,
+            "loansActedOn": 132
+          },
+          "0.7": {
+            "loans": 2196,
+            "baselineMarginCalls": 95,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 4,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1427275.2787948283,
+            "totalDebt": 15372000,
+            "interestSaved": 328.90227459490757,
+            "loansActedOn": 2196
+          },
+          "0.74": {
+            "loans": 2196,
+            "baselineMarginCalls": 650,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 10,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1625040,
+            "totalDebt": 16250400,
+            "interestSaved": 374.50671840000825,
+            "loansActedOn": 2196
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 1098,
+            "baselineMarginCalls": 4,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 37158.530519282984,
+            "totalDebt": 7137000,
+            "interestSaved": 8.539645523157876,
+            "loansActedOn": 66
+          },
+          "last_close@0.65": {
+            "loans": 1098,
+            "baselineMarginCalls": 3,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 37158.530519282984,
+            "totalDebt": 7137000,
+            "interestSaved": 8.539645523157876,
+            "loansActedOn": 66
+          },
+          "live_price@0.7": {
+            "loans": 1098,
+            "baselineMarginCalls": 50,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 2,
+            "morrowLiquidations": 0,
+            "usdtUsed": 713637.6393974148,
+            "totalDebt": 7686000,
+            "interestSaved": 164.45113729745376,
+            "loansActedOn": 1098
+          },
+          "last_close@0.7": {
+            "loans": 1098,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 2,
+            "morrowLiquidations": 0,
+            "usdtUsed": 713637.6393974148,
+            "totalDebt": 7686000,
+            "interestSaved": 164.45113729745376,
+            "loansActedOn": 1098
+          },
+          "live_price@0.74": {
+            "loans": 1098,
+            "baselineMarginCalls": 380,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 5,
+            "morrowLiquidations": 0,
+            "usdtUsed": 812520,
+            "totalDebt": 8125200,
+            "interestSaved": 187.25335919999614,
+            "loansActedOn": 1098
+          },
+          "last_close@0.74": {
+            "loans": 1098,
+            "baselineMarginCalls": 270,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 5,
+            "morrowLiquidations": 0,
+            "usdtUsed": 812520,
+            "totalDebt": 8125200,
+            "interestSaved": 187.25335919999614,
+            "loansActedOn": 1098
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 6570,
+            "baselineMarginCalls": 746,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 15,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3116406.1795974546,
+            "totalDebt": 45771000,
+            "interestSaved": 718.33799538159,
+            "loansActedOn": 4508
+          },
+          "trades_on_weekends": {
+            "loans": 18,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 10226.160235933987,
+            "totalDebt": 125400,
+            "interestSaved": 2.150288659654893,
+            "loansActedOn": 16
+          }
+        },
+        "closures": 6,
+        "tokens": 183
+      }
+    },
+    {
+      "idleFraction": 0.25,
+      "train": {
+        "all": {
+          "loans": 15102,
+          "baselineMarginCalls": 1249,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 0,
+          "morrowLiquidations": 0,
+          "usdtUsed": 9075042.655575903,
+          "totalDebt": 105210600,
+          "interestSaved": 2124.53118111004,
+          "loansActedOn": 10252
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 7551,
+            "baselineMarginCalls": 735,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4537521.32778791,
+            "totalDebt": 52605300,
+            "interestSaved": 1062.265590555018,
+            "loansActedOn": 5126
+          },
+          "last_close": {
+            "loans": 7551,
+            "baselineMarginCalls": 514,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4537521.32778791,
+            "totalDebt": 52605300,
+            "interestSaved": 1062.265590555018,
+            "loansActedOn": 5126
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 5034,
+            "baselineMarginCalls": 11,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 110910.64730381622,
+            "totalDebt": 32721000,
+            "interestSaved": 25.81885091818188,
+            "loansActedOn": 184
+          },
+          "0.7": {
+            "loans": 5034,
+            "baselineMarginCalls": 87,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3475602.340364008,
+            "totalDebt": 35238000,
+            "interestSaved": 813.6345356910294,
+            "loansActedOn": 5034
+          },
+          "0.74": {
+            "loans": 5034,
+            "baselineMarginCalls": 1151,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5488529.667908021,
+            "totalDebt": 37251600,
+            "interestSaved": 1285.0777945008258,
+            "loansActedOn": 5034
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 55455.323651908126,
+            "totalDebt": 16360500,
+            "interestSaved": 12.909425459090935,
+            "loansActedOn": 92
+          },
+          "last_close@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 5,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 55455.323651908126,
+            "totalDebt": 16360500,
+            "interestSaved": 12.909425459090935,
+            "loansActedOn": 92
+          },
+          "live_price@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1737801.1701820048,
+            "totalDebt": 17619000,
+            "interestSaved": 406.8172678455146,
+            "loansActedOn": 2517
+          },
+          "last_close@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 42,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1737801.1701820048,
+            "totalDebt": 17619000,
+            "interestSaved": 406.8172678455146,
+            "loansActedOn": 2517
+          },
+          "live_price@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 684,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2744264.833954008,
+            "totalDebt": 18625800,
+            "interestSaved": 642.5388972504157,
+            "loansActedOn": 2517
+          },
+          "last_close@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 467,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2744264.833954008,
+            "totalDebt": 18625800,
+            "interestSaved": 642.5388972504157,
+            "loansActedOn": 2517
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 15102,
+            "baselineMarginCalls": 1249,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 9075042.655575903,
+            "totalDebt": 105210600,
+            "interestSaved": 2124.53118111004,
+            "loansActedOn": 10252
+          }
+        },
+        "closures": 14,
+        "tokens": 182
+      },
+      "outOfSample": {
+        "all": {
+          "loans": 6588,
+          "baselineMarginCalls": 752,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 1,
+          "morrowLiquidations": 0,
+          "usdtUsed": 4060214.5021583745,
+          "totalDebt": 45896400,
+          "interestSaved": 935.4857147972099,
+          "loansActedOn": 4524
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 3294,
+            "baselineMarginCalls": 434,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2030107.2510791938,
+            "totalDebt": 22948200,
+            "interestSaved": 467.7428573986056,
+            "loansActedOn": 2262
+          },
+          "last_close": {
+            "loans": 3294,
+            "baselineMarginCalls": 318,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2030107.2510791938,
+            "totalDebt": 22948200,
+            "interestSaved": 467.7428573986056,
+            "loansActedOn": 2262
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 2196,
+            "baselineMarginCalls": 7,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 83048.00821074244,
+            "totalDebt": 14274000,
+            "interestSaved": 19.095289195854523,
+            "loansActedOn": 132
+          },
+          "0.7": {
+            "loans": 2196,
+            "baselineMarginCalls": 95,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1550413.5129285674,
+            "totalDebt": 15372000,
+            "interestSaved": 357.21679783757537,
+            "loansActedOn": 2196
+          },
+          "0.74": {
+            "loans": 2196,
+            "baselineMarginCalls": 650,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2426752.9810190666,
+            "totalDebt": 16250400,
+            "interestSaved": 559.1736277637802,
+            "loansActedOn": 2196
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 1098,
+            "baselineMarginCalls": 4,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 41524.00410537122,
+            "totalDebt": 7137000,
+            "interestSaved": 9.547644597927254,
+            "loansActedOn": 66
+          },
+          "last_close@0.65": {
+            "loans": 1098,
+            "baselineMarginCalls": 3,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 41524.00410537122,
+            "totalDebt": 7137000,
+            "interestSaved": 9.547644597927254,
+            "loansActedOn": 66
+          },
+          "live_price@0.7": {
+            "loans": 1098,
+            "baselineMarginCalls": 50,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 775206.756464284,
+            "totalDebt": 7686000,
+            "interestSaved": 178.6083989187882,
+            "loansActedOn": 1098
+          },
+          "last_close@0.7": {
+            "loans": 1098,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 775206.756464284,
+            "totalDebt": 7686000,
+            "interestSaved": 178.6083989187882,
+            "loansActedOn": 1098
+          },
+          "live_price@0.74": {
+            "loans": 1098,
+            "baselineMarginCalls": 380,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1213376.4905095396,
+            "totalDebt": 8125200,
+            "interestSaved": 279.5868138818896,
+            "loansActedOn": 1098
+          },
+          "last_close@0.74": {
+            "loans": 1098,
+            "baselineMarginCalls": 270,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1213376.4905095396,
+            "totalDebt": 8125200,
+            "interestSaved": 279.5868138818896,
+            "loansActedOn": 1098
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 6570,
+            "baselineMarginCalls": 746,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4045856.0214505726,
+            "totalDebt": 45771000,
+            "interestSaved": 932.5178008182453,
+            "loansActedOn": 4508
+          },
+          "trades_on_weekends": {
+            "loans": 18,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 14358.480707801966,
+            "totalDebt": 125400,
+            "interestSaved": 2.967913978964679,
+            "loansActedOn": 16
+          }
+        },
+        "closures": 6,
+        "tokens": 183
+      }
+    },
+    {
+      "idleFraction": 1,
+      "train": {
+        "all": {
+          "loans": 15102,
+          "baselineMarginCalls": 1249,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 0,
+          "morrowLiquidations": 0,
+          "usdtUsed": 9075715.3280319,
+          "totalDebt": 105210600,
+          "interestSaved": 2124.677218300236,
+          "loansActedOn": 10252
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 7551,
+            "baselineMarginCalls": 735,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4537857.664015905,
+            "totalDebt": 52605300,
+            "interestSaved": 1062.3386091501154,
+            "loansActedOn": 5126
+          },
+          "last_close": {
+            "loans": 7551,
+            "baselineMarginCalls": 514,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4537857.664015905,
+            "totalDebt": 52605300,
+            "interestSaved": 1062.3386091501154,
+            "loansActedOn": 5126
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 5034,
+            "baselineMarginCalls": 11,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 110910.64730381622,
+            "totalDebt": 32721000,
+            "interestSaved": 25.81885091818188,
+            "loansActedOn": 184
+          },
+          "0.7": {
+            "loans": 5034,
+            "baselineMarginCalls": 87,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 3475602.340364008,
+            "totalDebt": 35238000,
+            "interestSaved": 813.6345356910294,
+            "loansActedOn": 5034
+          },
+          "0.74": {
+            "loans": 5034,
+            "baselineMarginCalls": 1151,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 5489202.340364016,
+            "totalDebt": 37251600,
+            "interestSaved": 1285.223831691022,
+            "loansActedOn": 5034
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 55455.323651908126,
+            "totalDebt": 16360500,
+            "interestSaved": 12.909425459090935,
+            "loansActedOn": 92
+          },
+          "last_close@0.65": {
+            "loans": 2517,
+            "baselineMarginCalls": 5,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 55455.323651908126,
+            "totalDebt": 16360500,
+            "interestSaved": 12.909425459090935,
+            "loansActedOn": 92
+          },
+          "live_price@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1737801.1701820048,
+            "totalDebt": 17619000,
+            "interestSaved": 406.8172678455146,
+            "loansActedOn": 2517
+          },
+          "last_close@0.7": {
+            "loans": 2517,
+            "baselineMarginCalls": 42,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1737801.1701820048,
+            "totalDebt": 17619000,
+            "interestSaved": 406.8172678455146,
+            "loansActedOn": 2517
+          },
+          "live_price@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 684,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2744601.1701820036,
+            "totalDebt": 18625800,
+            "interestSaved": 642.6119158455133,
+            "loansActedOn": 2517
+          },
+          "last_close@0.74": {
+            "loans": 2517,
+            "baselineMarginCalls": 467,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2744601.1701820036,
+            "totalDebt": 18625800,
+            "interestSaved": 642.6119158455133,
+            "loansActedOn": 2517
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 15102,
+            "baselineMarginCalls": 1249,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 9075715.3280319,
+            "totalDebt": 105210600,
+            "interestSaved": 2124.677218300236,
+            "loansActedOn": 10252
+          }
+        },
+        "closures": 14,
+        "tokens": 182
+      },
+      "outOfSample": {
+        "all": {
+          "loans": 6588,
+          "baselineMarginCalls": 752,
+          "baselineLiquidations": 2,
+          "morrowMarginCalls": 1,
+          "morrowLiquidations": 0,
+          "usdtUsed": 4062275.0340678664,
+          "totalDebt": 45896400,
+          "interestSaved": 935.964948871006,
+          "loansActedOn": 4524
+        },
+        "byMode": {
+          "live_price": {
+            "loans": 3294,
+            "baselineMarginCalls": 434,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2031137.5170339402,
+            "totalDebt": 22948200,
+            "interestSaved": 467.982474435504,
+            "loansActedOn": 2262
+          },
+          "last_close": {
+            "loans": 3294,
+            "baselineMarginCalls": 318,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2031137.5170339402,
+            "totalDebt": 22948200,
+            "interestSaved": 467.982474435504,
+            "loansActedOn": 2262
+          }
+        },
+        "byStartLtv": {
+          "0.65": {
+            "loans": 2196,
+            "baselineMarginCalls": 7,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 83048.00821074244,
+            "totalDebt": 14274000,
+            "interestSaved": 19.095289195854523,
+            "loansActedOn": 132
+          },
+          "0.7": {
+            "loans": 2196,
+            "baselineMarginCalls": 95,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1550413.5129285674,
+            "totalDebt": 15372000,
+            "interestSaved": 357.21679783757537,
+            "loansActedOn": 2196
+          },
+          "0.74": {
+            "loans": 2196,
+            "baselineMarginCalls": 650,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 2428813.5129285585,
+            "totalDebt": 16250400,
+            "interestSaved": 559.6528618375771,
+            "loansActedOn": 2196
+          }
+        },
+        "byModeAndStart": {
+          "live_price@0.65": {
+            "loans": 1098,
+            "baselineMarginCalls": 4,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 41524.00410537122,
+            "totalDebt": 7137000,
+            "interestSaved": 9.547644597927254,
+            "loansActedOn": 66
+          },
+          "last_close@0.65": {
+            "loans": 1098,
+            "baselineMarginCalls": 3,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 41524.00410537122,
+            "totalDebt": 7137000,
+            "interestSaved": 9.547644597927254,
+            "loansActedOn": 66
+          },
+          "live_price@0.7": {
+            "loans": 1098,
+            "baselineMarginCalls": 50,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 775206.756464284,
+            "totalDebt": 7686000,
+            "interestSaved": 178.6083989187882,
+            "loansActedOn": 1098
+          },
+          "last_close@0.7": {
+            "loans": 1098,
+            "baselineMarginCalls": 45,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 775206.756464284,
+            "totalDebt": 7686000,
+            "interestSaved": 178.6083989187882,
+            "loansActedOn": 1098
+          },
+          "live_price@0.74": {
+            "loans": 1098,
+            "baselineMarginCalls": 380,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1214406.756464286,
+            "totalDebt": 8125200,
+            "interestSaved": 279.826430918788,
+            "loansActedOn": 1098
+          },
+          "last_close@0.74": {
+            "loans": 1098,
+            "baselineMarginCalls": 270,
+            "baselineLiquidations": 1,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 1214406.756464286,
+            "totalDebt": 8125200,
+            "interestSaved": 279.826430918788,
+            "loansActedOn": 1098
+          }
+        },
+        "byTradesOnWeekends": {
+          "paused_on_weekends": {
+            "loans": 6570,
+            "baselineMarginCalls": 746,
+            "baselineLiquidations": 2,
+            "morrowMarginCalls": 1,
+            "morrowLiquidations": 0,
+            "usdtUsed": 4047916.5533600645,
+            "totalDebt": 45771000,
+            "interestSaved": 932.9970348920414,
+            "loansActedOn": 4508
+          },
+          "trades_on_weekends": {
+            "loans": 18,
+            "baselineMarginCalls": 6,
+            "baselineLiquidations": 0,
+            "morrowMarginCalls": 0,
+            "morrowLiquidations": 0,
+            "usdtUsed": 14358.480707801966,
+            "totalDebt": 125400,
+            "interestSaved": 2.967913978964679,
+            "loansActedOn": 16
+          }
+        },
+        "closures": 6,
+        "tokens": 183
+      }
+    }
+  ]
+}
