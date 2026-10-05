@@ -1,11 +1,13 @@
+import { dirname, join } from "node:path";
 import { SCHEDULE } from "@morrow/config";
 import { modelAdvisor, rulesAdvisor, type Advisor } from "./advisor";
 import { ProfileCache } from "./assess";
 import { checkCalendar } from "./calendarCheck";
 import { nextDelaySeconds, runCycle } from "./cycle";
 import { Store } from "./db";
-import { keysFromEnv, livePorts } from "./liveports";
+import { keysFromEnv, liveBackingTokens, livePorts } from "./liveports";
 import { createServer } from "./server";
+import { loadShadow, shadowPorts } from "./shadow";
 
 const env = process.env;
 const store = new Store(env["DATABASE_PATH"] ?? "morrow.db");
@@ -20,8 +22,13 @@ const liveActions = env["MORROW_LIVE_ACTIONS"] === "go-live";
 const cache = new ProfileCache(ports);
 const deps = { store, ports, advisor, liveActions, cache };
 
+// The shadow ledger: one simulated loan the owner types in, run with live prices and limits, previews only (docs/VERIFIED.md item 3).
+const shadowStore = new Store(env["SHADOW_DATABASE_PATH"] ?? join(dirname(env["DATABASE_PATH"] ?? "morrow.db"), "shadow.db"));
+const shadow = shadowPorts(ports, shadowStore);
+const shadowDeps = { store: shadowStore, ports: shadow, advisor, liveActions: false, cache: new ProfileCache(shadow) };
+
 const port = Number(env["PORT"] ?? 8787);
-createServer({ ...deps, appToken: env["APP_TOKEN"] ?? null, allowedOrigin: env["APP_ORIGIN"] ?? null, connected: keys !== null }).listen(port, () => {
+createServer({ ...deps, appToken: env["APP_TOKEN"] ?? null, allowedOrigin: env["APP_ORIGIN"] ?? null, connected: keys !== null, listTokens: liveBackingTokens, shadowStore }).listen(port, () => {
   console.log(`Morrow worker on port ${port}. Bitget ${keys ? "connected" : "not connected"}. Actions: ${liveActions ? "LIVE" : "dry run"}. Advisor: ${env["MODEL_NAME"] ?? "rules only"}.`);
 });
 
@@ -38,6 +45,13 @@ async function loop(): Promise<void> {
     const r = await runCycle(deps);
     delay = nextDelaySeconds(r.nowMs, r.closure);
     for (const p of r.problems) console.warn(p);
+    if (loadShadow(shadowStore)) {
+      try {
+        await runCycle(shadowDeps);
+      } catch (e) {
+        console.error("Shadow cycle failed:", e instanceof Error ? e.message : e);
+      }
+    }
   } catch (e) {
     console.error("Cycle failed:", e instanceof Error ? e.message : e);
   }

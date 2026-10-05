@@ -126,3 +126,30 @@ export interface PublicRecord {
   promises: PublicPromise[];
   simulated: PublicPromise[];
 }
+
+/** "Check my loan": what the public check returns for three typed numbers. Nothing about it is stored. */
+export interface CheckResult {
+  asOf: number;
+  token: string;
+  loanCoin: string;
+  phase: "open" | "pre_closure" | "closed";
+  closure: { closeTs: number; reopenTs: number } | null;
+  price: number | null;
+  lastClose: number | null;
+  moveSinceClose: number | null;
+  health: {
+    ratio: number;
+    status: "safe" | "watch" | "margin_call" | "liquidation";
+    distanceToMarginCall: number;
+    distanceToLiquidation: number;
+    priceDropToMarginCall: number;
+    marginCallLevel: number;
+    liquidationLevel: number;
+    startLevel: number;
+  } | null;
+  projection: { ratio: number; status: string; basis: string; price: number | null } | null;
+  history: { closures: number; likelyDrop: number; severeDrop: number; likelyPercentile: number; severePercentile: number; tradesOnWeekends: boolean } | null;
+  trust: { trusted: boolean; failures: string[] } | null;
+  suggestion: { payDown: number; addBacking: number; ratioAfter: number; targetRatio: number } | null;
+  problems: string[];
+}

@@ -1,5 +1,5 @@
 import {
-  fetchHourlyHistory, fetchLastTradeMs, fetchLoanCoins, fetchOrderBook, fetchQuote, fetchStockTokens, MorrowBitget, sdkTransport,
+  fetchCollateralStocks, fetchHourlyHistory, fetchLastTradeMs, fetchLoanCoins, fetchOrderBook, fetchQuote, fetchStockTokens, MorrowBitget, sdkTransport,
   type Transport,
 } from "@morrow/bitget";
 import { BITGET_BASE_URL, BITGET_PATHS, MS_PER_HOUR } from "@morrow/config";
@@ -18,6 +18,12 @@ export function keysFromEnv(env: NodeJS.ProcessEnv): Keys | null {
   const secretKey = env["BITGET_SECRET_KEY"];
   const passphrase = env["BITGET_PASSPHRASE"];
   return apiKey && secretKey && passphrase ? { apiKey, secretKey, passphrase } : null;
+}
+
+/** Stock tokens Bitget accepts as loan backing and lists as online right now. Read live, never typed in. */
+export async function liveBackingTokens(): Promise<string[]> {
+  const stocks = await fetchCollateralStocks();
+  return stocks.filter((s) => s.online).map((s) => s.baseCoin).sort((a, b) => a.localeCompare(b));
 }
 
 export function liveMarket(): MarketPort {

@@ -16,6 +16,9 @@ export function Hero() {
             See the record
           </Link>
         </div>
+        <Link href="/check" className="mt-5 inline-block text-sm font-medium text-accent underline underline-offset-2">
+          Check my loan, no login needed
+        </Link>
       </div>
       <PriceLine />
     </section>

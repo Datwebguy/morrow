@@ -111,6 +111,18 @@ export const SCHEDULE = {
 } as const;
 
 /**
+ * "Check my loan" (public, no login, nothing stored). Product choices, not market data.
+ * The borrowed coin is USDT, the coin Version 1 is built for (AGENTS.md section 1).
+ */
+export const CHECK_MY_LOAN = {
+  loanCoin: "USDT",
+  /** Requests allowed per visitor address per minute. Counts are kept in memory only, never the loan figures. */
+  requestsPerMinute: 20,
+  /** Largest amount accepted in either field. Rejects typing slips, not real loans. */
+  maxAmount: 1_000_000_000_000,
+} as const;
+
+/**
  * Default trigger distance in points from the margin-call level.
  * Chosen on the earlier period of the history replay (docs/METHOD.md); the user can change it in Settings.
  */

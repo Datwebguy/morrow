@@ -61,7 +61,11 @@ Live record: starts with the first real protected closure. Until then the site s
 
 Built and tested: core logic (loan maths, reopen risk, price trust, sizing, rules), a Bitget layer that refuses forbidden calls, the history replay, a worker (monitoring, sealed promises, grading, Ask me first and Protect automatically, Pause all, Disconnect), the app, the public site and record page. Lint, typecheck, 183 tests and the production build pass. Lighthouse on the home page: 95 mobile and 100 desktop for performance, 100 for accessibility.
 
-Not done yet, and said plainly: the worker is not hosted anywhere yet, no real Bitget account has been connected, and so no real loan has been protected. Several Bitget facts could not be confirmed without a key (see `docs/VERIFIED.md`): which price Crypto Loans use while the market is closed, whether an Agentic account can operate loans, whether demo supports loans, and the exact field names of the loan responses.
+Also built: **Check my loan** (`/check`), open to everyone with no login. A visitor types the stock token, the backing amount and the amount borrowed, and Morrow shows loan health, the distance to the margin-call and liquidation levels, the projected loan health at the next reopen, the price trust result and the smallest suggested action, all from live Bitget prices, live loan limits and the stock's own reopening history. It touches no account, asks for no keys and stores nothing.
+
+Version 1 scope, said plainly: Morrow acts only on the owner's one connected Bitget account. It never collects or stores anyone else's keys. Multi-user protection is the next step and depends on Bitget's Agentic-account OAuth (`docs/VERIFIED.md`, item 2).
+
+The worker is hosted and running in dry-run mode. No real loan has been protected yet. Bitget's demo environment has no Crypto Loans (`docs/VERIFIED.md`, item 3), so the log runs as a **shadow ledger**: one simulated loan, live prices and live loan limits, previews only, every entry labelled simulated and never counted in the public totals. The owner's one real, small loan follows in "Ask me first" mode with dry run on, and nothing goes live until the owner says "go live". Other Bitget facts still need a working key (see `docs/VERIFIED.md`): which price Crypto Loans use while the market is closed, whether an Agentic account can operate loans, and the exact field names of the loan responses.
 
 ### 5. Deliverables
 
@@ -92,6 +96,7 @@ What code enforces, whatever the model says: the amount (smallest plan that reac
 Website: https://themorrow.vercel.app
 App: https://themorrow.vercel.app/app
 Public record: https://themorrow.vercel.app/record
+Check my loan (no login): https://themorrow.vercel.app/check
 Repository: https://github.com/Datwebguy/morrow
 Replay report (data): https://themorrow.vercel.app/replay-report.json
 Replay method: https://github.com/Datwebguy/morrow/blob/HEAD/docs/METHOD.md
@@ -114,5 +119,5 @@ Demo Day and K3 subsidy: your choice. Not filled in.
 1. Post the X post. Without it the entry is invalid.
 2. Record the video from `docs/VIDEO_SCRIPT.md` and add its link.
 3. Fill in the model name above, or leave "rules only" if that is the truth.
-4. The app behind "Connect Bitget" needs a host for the worker (a server that stays on, with a small disk). It is not set up yet, so the app at `/app` shows "not linked to a server yet". The video covers it.
+4. The app behind "Connect Bitget" is the owner's own account only. Show `/check` (public) and the shadow ledger (`/public/shadow` on the worker) in the video, and label anything simulated as simulated.
 5. If you connect a real loan, run it in Ask me first mode with dry run until you decide to go live, and replace the simulated case with your own.

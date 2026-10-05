@@ -55,7 +55,7 @@ function view(row: PromiseRow): PublicPromise {
 }
 
 /** The public record. Personal details are never included. */
-export function publicRecord(store: Store): PublicRecord {
+export function publicRecord(store: Store, shadowStore?: Store): PublicRecord {
   const all = store.allPromises().map(view);
   const real = all.filter((p) => !p.simulated);
   const graded = real.filter((p) => p.status === "graded");
@@ -66,6 +66,7 @@ export function publicRecord(store: Store): PublicRecord {
       totalCost: graded.reduce((s, p) => s + (p.cost ?? 0), 0),
     },
     promises: real,
-    simulated: all.filter((p) => p.simulated),
+    // The shadow ledger's promises are simulated by construction. They are listed apart and never counted.
+    simulated: [...all.filter((p) => p.simulated), ...(shadowStore ? shadowStore.allPromises().map(view).map((p) => ({ ...p, simulated: true })) : [])],
   };
 }

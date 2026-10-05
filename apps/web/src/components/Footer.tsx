@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Logo } from "./Logo";
 
 const COLS = [
-  { title: "Product", links: [{ label: "Protect", href: "/app" }, { label: "Record", href: "/record" }, { label: "Pricing", href: "/pricing" }] },
+  { title: "Product", links: [{ label: "Protect", href: "/app" }, { label: "Check my loan", href: "/check" }, { label: "Record", href: "/record" }, { label: "Pricing", href: "/pricing" }] },
   { title: "Learn", links: [{ label: "How it works", href: "/#how" }, { label: "FAQ", href: "/#faq" }, { label: "Risks", href: "/risks" }] },
   { title: "Build", links: [{ label: "GitHub", href: "https://github.com/Datwebguy/morrow" }, { label: "Bitget docs", href: "https://www.bitget.com/api-doc/uta/intro" }] },
 ] as const;

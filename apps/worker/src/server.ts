@@ -2,10 +2,14 @@ import { timingSafeEqual } from "node:crypto";
 import { createServer as httpServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { NYSE_CALENDAR } from "@morrow/config";
 import { currentOrNextClosure, type MarketClosure } from "@morrow/core";
+import { CHECK_MY_LOAN } from "@morrow/config";
 import { approve, reject, type ApproveDeps } from "./approve";
 import { assessLoan, type Assessment } from "./assess";
+import { checkLoan, CheckError, parseCheckInput, RateLimiter } from "./check";
+import type { Store } from "./db";
 import { publicRecord } from "./record";
 import { loadSettings, SettingsError, updateSettings } from "./settings";
+import { clearShadow, loadShadow, saveShadow, ShadowError } from "./shadow";
 
 export interface ServerDeps extends ApproveDeps {
   /** Secret the app sends. Without it, private routes are closed. */
@@ -14,6 +18,10 @@ export interface ServerDeps extends ApproveDeps {
   allowedOrigin: string | null;
   /** True when Bitget credentials exist on the server. Whether the user has connected is a separate switch. */
   connected: boolean;
+  /** Stock tokens Bitget accepts as backing right now, for the public "Check my loan" picker. Absent: the picker is closed. */
+  listTokens?: () => Promise<string[]>;
+  /** The shadow ledger's own store (its simulated loan, log and promises). Absent: no shadow ledger. */
+  shadowStore?: Store;
 }
 
 const DISCONNECTED = "disconnected";
@@ -61,21 +69,54 @@ function loanView(a: Assessment, protectedLoan: boolean): unknown {
   };
 }
 
+function clientAddress(req: IncomingMessage): string {
+  const forwarded = (req.headers["x-forwarded-for"] ?? "").toString().split(",")[0]?.trim();
+  return forwarded || req.socket.remoteAddress || "unknown";
+}
+
+/** The shadow ledger's paper log in the format the hackathon form asks for. Every row is simulated. */
+function shadowLog(store: Store | undefined): unknown {
+  if (!store) return { simulated: true, entries: [] };
+  const entries = store.allLog().filter((e) => e.kind === "action" || e.kind === "refused" || e.kind === "promise" || e.kind === "grade")
+    .map((e) => ({ timestamp: e.ts, kind: e.kind, instrument: e.instrument, direction: e.direction, price: e.price, quantity: e.quantity, balanceChange: e.balanceChange, reason: e.reason, simulated: true }));
+  return { simulated: true, entries };
+}
+
 /** The worker's small HTTP surface: a public record, and private routes for the app. */
 export function createServer(d: ServerDeps): Server {
   let loansCache: { at: number; body: unknown } | null = null;
+  const limiter = new RateLimiter(CHECK_MY_LOAN.requestsPerMinute);
   return httpServer(async (req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost");
     const path = url.pathname;
     const publicCors = { "access-control-allow-origin": "*" };
     try {
       if (req.method === "OPTIONS") {
-        const o = d.allowedOrigin ?? "*";
+        const o = path.startsWith("/public/") ? "*" : d.allowedOrigin ?? "*";
         res.writeHead(204, { "access-control-allow-origin": o, "access-control-allow-headers": "authorization, content-type", "access-control-allow-methods": "GET, PUT, POST, OPTIONS" });
         return void res.end();
       }
       if (req.method === "GET" && path === "/public/health") return send(res, 200, { ok: true, now: d.ports.nowMs() }, publicCors);
-      if (req.method === "GET" && path === "/public/record") return send(res, 200, publicRecord(d.store), publicCors);
+      if (req.method === "GET" && path === "/public/record") return send(res, 200, publicRecord(d.store, d.shadowStore), publicCors);
+      if (req.method === "GET" && path === "/public/shadow") return send(res, 200, shadowLog(d.shadowStore), publicCors);
+      if (req.method === "GET" && path === "/public/check/tokens") {
+        if (!d.listTokens) return send(res, 503, { error: "The token list is not available right now." }, publicCors);
+        try {
+          return send(res, 200, { asOf: d.ports.nowMs(), tokens: await d.listTokens() }, publicCors);
+        } catch {
+          return send(res, 503, { error: "Bitget's token list could not be read right now. Try again in a minute." }, publicCors);
+        }
+      }
+      if (req.method === "POST" && path === "/public/check") {
+        if (!limiter.allow(clientAddress(req))) return send(res, 429, { error: "Too many checks from this address. Wait a minute and try again." }, publicCors);
+        try {
+          const input = parseCheckInput(await readJson(req));
+          return send(res, 200, await checkLoan(d.ports, d.cache, input), publicCors);
+        } catch (e) {
+          if (e instanceof CheckError || e instanceof SettingsError) return send(res, 400, { error: e.message }, publicCors);
+          return send(res, 503, { error: "Bitget market data could not be read right now. Try again in a minute." }, publicCors);
+        }
+      }
 
       if (!path.startsWith("/api/")) return send(res, 404, { error: "Not found." });
       if (!d.appToken) return send(res, 503, { error: "App access is not set up on the server yet." });
@@ -116,6 +157,15 @@ export function createServer(d: ServerDeps): Server {
         loansCache = { at: Date.now(), body };
         return send(res, 200, body, cors);
       }
+      if (path === "/api/shadow") {
+        if (!d.shadowStore) return send(res, 503, { error: "The shadow ledger is not set up on the server." }, cors);
+        if (req.method === "GET") return send(res, 200, { loan: loadShadow(d.shadowStore), settings: loadSettings(d.shadowStore) }, cors);
+        if (req.method === "PUT") return send(res, 200, { loan: saveShadow(d.shadowStore, await readJson(req)) }, cors);
+        if (req.method === "DELETE") {
+          clearShadow(d.shadowStore);
+          return send(res, 200, { loan: null }, cors);
+        }
+      }
       if (req.method === "GET" && path === "/api/activity") {
         return send(res, 200, { entries: d.store.recentLog(Math.min(200, Number(url.searchParams.get("limit") ?? 50) || 50), url.searchParams.get("loan") ?? undefined) }, cors);
       }
@@ -150,7 +200,7 @@ export function createServer(d: ServerDeps): Server {
       }
       return send(res, 404, { error: "Not found." }, cors);
     } catch (e) {
-      if (e instanceof SettingsError) return send(res, 400, { error: e.message });
+      if (e instanceof SettingsError || e instanceof ShadowError) return send(res, 400, { error: e.message });
       return send(res, 500, { error: "Something went wrong on the server. Try again." });
     }
   });
