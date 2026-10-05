@@ -3,52 +3,57 @@
 import Link from "next/link";
 import { Countdown, useNow } from "./Countdown";
 import { EmptyState, ErrorNote } from "./EmptyState";
-import { Gauge } from "./Gauge";
 import { LoanCardSkeleton } from "./Skeleton";
 import { TrustBadge } from "./TrustBadge";
 import { WORKER_URL } from "@/lib/api";
 import { ago, percent, points } from "@/lib/format";
 import type { ShadowLoanView, ShadowView } from "@/lib/types";
 import { useApi } from "@/lib/useApi";
-import { basisWord } from "@/lib/words";
+import { basisWord, statusWord } from "@/lib/words";
 
-function Card({ loan, phase }: { loan: ShadowLoanView; phase: ShadowLoanView["phase"] }) {
+const BAR: Record<string, string> = { safe: "var(--safe)", watch: "var(--watch)", margin_call: "var(--danger)", liquidation: "var(--danger)" };
+
+/** Loan health as a slim bar from zero to the liquidation level, with a tick at the margin-call level. */
+function HealthBar({ ratio, marginCall, liquidation, status }: { ratio: number; marginCall: number; liquidation: number; status: string }) {
+  const pct = (x: number): string => `${Math.min(100, Math.max(0, (x / liquidation) * 100))}%`;
+  return (
+    <div className="relative mt-3 h-2 rounded-full bg-line" role="img" aria-label={`Loan health ${percent(ratio)}, margin-call level ${percent(marginCall, 0)}, liquidation level ${percent(liquidation, 0)}`}>
+      <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: pct(ratio), background: BAR[status] ?? "var(--muted)" }} />
+      <div className="absolute -inset-y-1 w-0.5 bg-ink" style={{ left: pct(marginCall) }} aria-hidden />
+    </div>
+  );
+}
+
+function Card({ loan }: { loan: ShadowLoanView }) {
   const now = useNow(30_000);
   const h = loan.health;
   return (
-    <article className="rounded-2xl border border-line bg-surface p-5" aria-label={`Simulated ${loan.instrument} loan`}>
+    <article className="rounded-2xl border border-line bg-surface p-4" aria-label={`Simulated ${loan.instrument} loan`}>
       <header className="flex items-baseline justify-between gap-3">
         <h3 className="text-base">{loan.instrument}</h3>
         <p className="text-sm font-medium text-accent">Simulated</p>
       </header>
-      <p className="text-sm text-muted">Opened at <span className="num">{percent(loan.startHealth, 0)}</span> loan health</p>
       {h ? (
         <>
-          <div className="mt-3">
-            <Gauge ratio={h.ratio} marginCall={h.marginCallLevel} liquidation={h.liquidationLevel} status={h.status} />
+          <div className="mt-2 flex items-baseline justify-between gap-3">
+            <p className="num text-3xl font-semibold">{percent(h.ratio)}</p>
+            <p className="text-sm text-muted">{statusWord(h.status)} · opened at <span className="num">{percent(loan.startHealth, 0)}</span></p>
           </div>
-          <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-xl bg-canvas p-3">
-              <dt className="text-muted">To margin call</dt>
-              <dd className="num mt-1 text-base font-semibold">{points(h.distanceToMarginCall)}</dd>
-            </div>
-            <div className="rounded-xl bg-canvas p-3">
-              <dt className="text-muted">To liquidation</dt>
-              <dd className="num mt-1 text-base font-semibold">{points(h.distanceToLiquidation)}</dd>
-            </div>
-          </dl>
+          <HealthBar ratio={h.ratio} marginCall={h.marginCallLevel} liquidation={h.liquidationLevel} status={h.status} />
+          <p className="mt-3 text-sm text-muted">
+            To margin call <span className="num text-ink">{points(h.distanceToMarginCall)}</span> · to liquidation <span className="num text-ink">{points(h.distanceToLiquidation)}</span>
+          </p>
         </>
       ) : (
-        <p className="mt-4 rounded-xl bg-canvas p-4 text-sm text-muted">Loan health is not available right now. {loan.problems[0] ?? ""}</p>
+        <p className="mt-3 rounded-xl bg-canvas p-3 text-sm text-muted">Loan health is not available right now. {loan.problems[0] ?? ""}</p>
       )}
-      <div className="mt-4 space-y-2 border-t border-line pt-3 text-sm">
+      <div className="mt-3 space-y-2 border-t border-line pt-3 text-sm">
         <div className="flex items-center justify-between gap-3">
           <span className="text-muted">Projected at reopen</span>
           {loan.projection ? <span className="num font-medium" title={basisWord(loan.projection.basis)}>{percent(loan.projection.ratio)}</span> : <span className="text-muted">Not available</span>}
         </div>
         <TrustBadge trust={loan.trust} />
         <p className="text-muted">
-          {phase === "open" ? "Market open." : "Market closed."}{" "}
           {loan.lastDecision ? (
             <>
               <span className="text-ink">{loan.lastDecision.reason}</span>
@@ -96,7 +101,7 @@ export function PublicShadowView() {
           <h2 className="mb-3 text-lg">{coin}</h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {loans.map((l) => (
-              <Card key={l.orderId} loan={l} phase={phase} />
+              <Card key={l.orderId} loan={l} />
             ))}
           </div>
         </section>

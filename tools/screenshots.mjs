@@ -6,11 +6,14 @@ import { chromium } from "playwright-core";
 const [site, out, key, ...rest] = process.argv.slice(2);
 if (!site || !out) throw new Error("Usage: node tools/screenshots.mjs <siteUrl> <outDir> <accessKey> [paths...]");
 const paths = rest.length ? rest : ["/app/connect", "/app", "/app/activity", "/app/record", "/app/settings"];
-const sizes = { desktop: { width: 1280, height: 800 }, mobile: { width: 390, height: 844 } };
+const allSizes = { desktop: { width: 1280, height: 800 }, mobile: { width: 390, height: 844 } };
+// SIZES=mobile and SCHEMES=light narrow the run (comma separated).
+const only = (list, all) => (list ? all.filter((x) => list.split(",").includes(x)) : all);
+const sizes = Object.fromEntries(only(process.env["SIZES"], Object.keys(allSizes)).map((k) => [k, allSizes[k]]));
 mkdirSync(out, { recursive: true });
 
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args: process.env["IGNORE_CERT"] === "1" ? ["--no-sandbox", "--ignore-certificate-errors"] : ["--no-sandbox"] });
-for (const scheme of ["light", "dark"]) {
+for (const scheme of only(process.env["SCHEMES"], ["light", "dark"])) {
   for (const [name, viewport] of Object.entries(sizes)) {
     const ctx = await browser.newContext({ viewport, colorScheme: scheme, reducedMotion: "reduce" });
     if (key) await ctx.addInitScript((k) => window.localStorage.setItem("morrow.key", k), key);

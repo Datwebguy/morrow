@@ -33,7 +33,7 @@ describe("/app without signing in", () => {
     expect(screen.getByRole("heading", { name: "Live simulated loans" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Owner sign-in" })).toHaveAttribute("href", "/app/connect");
     await waitFor(() => expect(screen.getAllByText("Simulated").length).toBe(2));
-    expect(screen.getAllByText(/Opened at/).length).toBe(2);
+    expect(screen.getAllByText(/opened at/).length).toBe(2);
     expect(screen.getAllByText(/Safe\. Projected loan health/).length).toBe(2);
     expect(screen.getByText(/Next closure in/)).toBeInTheDocument();
     expect(screen.queryByText("Connect Bitget")).toBeNull();
