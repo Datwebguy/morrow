@@ -88,7 +88,7 @@ AI should judge, and code should enforce. In Morrow the model reads the situatio
 
 ## Role of the AI model
 
-**The model:** Claude from Anthropic (default `claude-opus-5-5`) through Anthropic's official SDK, set with `LLM_API_KEY` alone. The worker also speaks to any chat-completions provider (Gemini, OpenAI, Qwen and the like) by changing `LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL` and `LLM_API_KEY` (`docs/MODELS.md`). The worker reports the model it is running at `/public/health`, and every logged decision records the model that made it. **Before you submit, confirm the name from `/public/health` and the log.** If no key is set, Morrow runs "rules only" and the log says so, so the form must say that instead.
+**The model:** Claude from Anthropic (default `claude-sonnet-5-5`) through Anthropic's official SDK, set with `LLM_API_KEY` alone. The worker also speaks to any chat-completions provider (Gemini, OpenAI, Qwen and the like) by changing `LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL` and `LLM_API_KEY` (`docs/MODELS.md`). The worker reports the model it is running at `/public/health`, and every logged decision records the model that made it. **Before you submit, confirm the name from `/public/health` and the log.** If no key is set, Morrow runs "rules only" and the log says so, so the form must say that instead.
 
 What the model decides: for a loan that is projected near its margin-call level, one of none, alert, pay down or add backing, and one plain sentence for the user. It is shown the projected loan health, the price trust result, the move since the close, the stock's historical reopening drop, the code's smallest plan, the actions the user allows, and the latest Bitget announcements.
 

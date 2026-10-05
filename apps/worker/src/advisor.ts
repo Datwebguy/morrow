@@ -109,9 +109,9 @@ export function anthropicAdvisor(cfg: ModelConfig, create?: MessagesCreate): Adv
         msg = await call({
           model: cfg.model,
           max_tokens: ANTHROPIC_ADVISOR.maxTokens,
-          // If a safety check declines the request, the API retries it on the fallback model inside the same call.
-          betas: ["server-side-fallback-2026-06-01"],
-          fallbacks: [{ model: ANTHROPIC_ADVISOR.fallbackModel }],
+          // If a safety check declines the request, the API routes it to the right fallback model inside the same call.
+          betas: ["server-side-fallback-2026-07-01"],
+          fallbacks: "default",
           output_config: { effort: ANTHROPIC_ADVISOR.effort },
           system: SYSTEM,
           messages: [{ role: "user", content: JSON.stringify(s) }],

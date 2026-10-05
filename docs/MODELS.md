@@ -4,7 +4,7 @@ Morrow's AI makes one choice per loan that needs attention: do nothing, alert, p
 
 ## Anthropic (Claude), through its own SDK
 
-Set `LLM_API_KEY` to a key from console.anthropic.com (it starts with `sk-ant-`). That is all: the provider is detected from the key, the model defaults to `claude-opus-5-5`, and the worker uses Anthropic's official SDK (not a compatibility layer), with low effort, no sampling settings, and the refusal fallback on. `LLM_PROVIDER=anthropic` forces it, and `LLM_MODEL` picks another Claude model. Leave `LLM_BASE_URL` empty.
+Set `LLM_API_KEY` to a key from console.anthropic.com (it starts with `sk-ant-`). That is all: the provider is detected from the key, the model defaults to `claude-sonnet-5-5`, and the worker uses Anthropic's official SDK (not a compatibility layer), with medium effort, no sampling settings, and the refusal fallback on. `LLM_PROVIDER=anthropic` forces it, and `LLM_MODEL` picks another Claude model. Leave `LLM_BASE_URL` empty.
 
 ## The settings for any other provider
 

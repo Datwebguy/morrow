@@ -142,31 +142,31 @@ describe("Anthropic as the model", () => {
   const reply = (over: Record<string, unknown>) => ({ stop_reason: "end_turn", content: [{ type: "text", text: '{"action":"pay_down","reason":"Loan health is too close."}' }], ...over }) as never;
 
   it("is chosen by LLM_PROVIDER, by an Anthropic key, or by Anthropic's address, with a default model and no address needed", () => {
-    const want = { provider: "anthropic", baseUrl: "", model: "claude-opus-5-5", apiKey: "sk-ant-x" };
+    const want = { provider: "anthropic", baseUrl: "", model: "claude-sonnet-5-5", apiKey: "sk-ant-x" };
     expect(modelConfigFromEnv({ LLM_API_KEY: "sk-ant-x" })).toEqual(want);
-    expect(modelConfigFromEnv({ LLM_PROVIDER: "anthropic", LLM_API_KEY: "k", LLM_MODEL: "claude-sonnet-5-5" })).toMatchObject({ provider: "anthropic", model: "claude-sonnet-5-5" });
+    expect(modelConfigFromEnv({ LLM_PROVIDER: "anthropic", LLM_API_KEY: "k", LLM_MODEL: "claude-opus-5-5" })).toMatchObject({ provider: "anthropic", model: "claude-opus-5-5" });
     expect(modelConfigFromEnv({ LLM_BASE_URL: "https://api.anthropic.com/v1/", LLM_API_KEY: "k" })).toMatchObject({ provider: "anthropic", baseUrl: "" });
     expect(modelConfigFromEnv({ LLM_PROVIDER: "anthropic" })).toBeNull(); // no key
   });
 
   it("ignores a leftover Gemini address and model name when the key is Anthropic's", () => {
     const left = { LLM_API_KEY: "sk-ant-x", LLM_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/openai/", LLM_MODEL: "gemini-3.8-flash" };
-    expect(modelConfigFromEnv(left)).toEqual({ provider: "anthropic", baseUrl: "", model: "claude-opus-5-5", apiKey: "sk-ant-x" });
+    expect(modelConfigFromEnv(left)).toEqual({ provider: "anthropic", baseUrl: "", model: "claude-sonnet-5-5", apiKey: "sk-ant-x" });
   });
 
   it("ignores the other provider's leftover address and model when switching, and an empty value counts as not set", () => {
     const env = { LLM_PROVIDER: "anthropic", LLM_API_KEY: "sk-ant-x", LLM_BASE_URL: "", LLM_MODEL: "" };
-    expect(modelConfigFromEnv(env)).toEqual({ provider: "anthropic", baseUrl: "", model: "claude-opus-5-5", apiKey: "sk-ant-x" });
+    expect(modelConfigFromEnv(env)).toEqual({ provider: "anthropic", baseUrl: "", model: "claude-sonnet-5-5", apiKey: "sk-ant-x" });
   });
 
-  it("asks Claude for the one-word choice with the official request shape: no sampling settings, low effort, refusal fallback", async () => {
+  it("asks Claude for the one-word choice with the official request shape: no sampling settings, medium effort, refusal fallback", async () => {
     let seen: Record<string, unknown> = {};
-    const a = anthropicAdvisor({ provider: "anthropic", baseUrl: "", model: "claude-opus-5-5", apiKey: "k" }, async (p) => {
+    const a = anthropicAdvisor({ provider: "anthropic", baseUrl: "", model: "claude-sonnet-5-5", apiKey: "k" }, async (p) => {
       seen = p as unknown as Record<string, unknown>;
       return reply({});
     });
-    expect(await a.choose(sit)).toEqual({ action: "pay_down", reason: "Loan health is too close.", by: "claude-opus-5-5" });
-    expect(seen).toMatchObject({ model: "claude-opus-5-5", output_config: { effort: "low" }, betas: ["server-side-fallback-2026-06-01"], fallbacks: [{ model: "claude-opus-4-8" }] });
+    expect(await a.choose(sit)).toEqual({ action: "pay_down", reason: "Loan health is too close.", by: "claude-sonnet-5-5" });
+    expect(seen).toMatchObject({ model: "claude-sonnet-5-5", output_config: { effort: "medium" }, betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" });
     expect(seen).not.toHaveProperty("temperature");
     expect(seen).not.toHaveProperty("thinking");
     expect(JSON.stringify(seen["messages"])).toContain("pay_down");
