@@ -1,0 +1,178 @@
+import { BITGET_BASE_URL, BITGET_PATHS, HISTORY_GRANULARITY, MS_PER_HOUR } from "@morrow/config";
+import type { BookLevel, Candle, LoanLimits } from "@morrow/core";
+
+export type Fetch = (url: string) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
+
+export interface MarketOptions {
+  fetch?: Fetch;
+  baseUrl?: string;
+}
+
+export class BitgetDataError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "BitgetDataError";
+  }
+}
+
+function num(value: unknown, what: string): number {
+  const n = typeof value === "string" || typeof value === "number" ? Number(value) : Number.NaN;
+  if (value === "" || !Number.isFinite(n)) throw new BitgetDataError(`${what} is not a number`);
+  return n;
+}
+
+function obj(value: unknown, what: string): Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) throw new BitgetDataError(`${what} is not an object`);
+  return value as Record<string, unknown>;
+}
+
+function arr(value: unknown, what: string): unknown[] {
+  if (!Array.isArray(value)) throw new BitgetDataError(`${what} is not a list`);
+  return value;
+}
+
+async function getData(path: string, query: Record<string, string | number>, o: MarketOptions): Promise<unknown> {
+  const f: Fetch = o.fetch ?? ((url) => fetch(url));
+  const qs = new URLSearchParams(Object.entries(query).map(([k, v]) => [k, String(v)])).toString();
+  const res = await f(`${o.baseUrl ?? BITGET_BASE_URL}${path}${qs ? `?${qs}` : ""}`);
+  if (!res.ok) throw new BitgetDataError(`Bitget answered with status ${res.status}`);
+  const body = obj(await res.json(), "response");
+  if (body["code"] !== "00000") throw new BitgetDataError(`Bitget refused the request: ${String(body["msg"] ?? "no reason given")}`);
+  return body["data"];
+}
+
+export interface BackingCoin {
+  coin: string;
+  limits: LoanLimits;
+  maxPledgeAmount: number;
+}
+
+export interface LoanCoins {
+  fetchedAt: number;
+  borrowCoins: string[];
+  backing: BackingCoin[];
+}
+
+/** Loan coins and per-backing limits, live from Bitget. No key needed. */
+export async function fetchLoanCoins(o: MarketOptions = {}): Promise<LoanCoins> {
+  const data = obj(await getData(BITGET_PATHS.loanCoins, {}, o), "loan coins");
+  const loans = arr(data["loanInfos"], "loanInfos").map((x) => String(obj(x, "loan coin")["coin"]));
+  const backing = arr(data["pledgeInfos"], "pledgeInfos").map((x) => {
+    const r = obj(x, "backing coin");
+    return {
+      coin: String(r["coin"]),
+      limits: {
+        start: num(r["initRate"], "initRate"),
+        marginCall: num(r["supRate"], "supRate"),
+        liquidation: num(r["forceRate"], "forceRate"),
+      },
+      maxPledgeAmount: num(r["maxPledgeAmount"], "maxPledgeAmount"),
+    };
+  });
+  return { fetchedAt: Date.now(), borrowCoins: loans, backing };
+}
+
+export interface StockToken {
+  symbol: string;
+  baseCoin: string;
+  online: boolean;
+}
+
+/** Stock tokens that are real (not synthetic) listings, live from Bitget. */
+export async function fetchStockTokens(o: MarketOptions = {}): Promise<StockToken[]> {
+  const data = arr(await getData(BITGET_PATHS.instruments, { category: "SPOT" }, o), "instruments");
+  return data
+    .map((x) => obj(x, "instrument"))
+    .filter((r) => r["symbolType"] === "stock" && r["isReality"] === "yes")
+    .map((r) => ({ symbol: String(r["symbol"]), baseCoin: String(r["baseCoin"]), online: r["status"] === "online" }));
+}
+
+export interface CollateralStock extends StockToken {
+  limits: LoanLimits;
+  maxPledgeAmount: number;
+}
+
+/** Stock tokens Bitget accepts as loan backing, with their live limits. */
+export async function fetchCollateralStocks(o: MarketOptions = {}): Promise<CollateralStock[]> {
+  const [coins, stocks] = await Promise.all([fetchLoanCoins(o), fetchStockTokens(o)]);
+  const byCoin = new Map(coins.backing.map((b) => [b.coin.toUpperCase(), b]));
+  const out: CollateralStock[] = [];
+  for (const s of stocks) {
+    const b = byCoin.get(s.baseCoin.toUpperCase());
+    if (b) out.push({ ...s, limits: b.limits, maxPledgeAmount: b.maxPledgeAmount });
+  }
+  return out;
+}
+
+export interface Quote {
+  symbol: string;
+  last: number;
+  bid: number;
+  ask: number;
+  /** When Bitget produced this snapshot. */
+  snapshotMs: number;
+}
+
+export async function fetchQuote(symbol: string, o: MarketOptions = {}): Promise<Quote> {
+  const rows = arr(await getData(BITGET_PATHS.tickers, { symbol }, o), "tickers");
+  const r = obj(rows[0], "ticker");
+  return {
+    symbol,
+    last: num(r["lastPr"], "lastPr"),
+    bid: num(r["bidPr"], "bidPr"),
+    ask: num(r["askPr"], "askPr"),
+    snapshotMs: num(r["ts"], "ts"),
+  };
+}
+
+/** Time of the most recent trade, from Bitget's recent trades. Null when there are none. */
+export async function fetchLastTradeMs(symbol: string, o: MarketOptions = {}): Promise<number | null> {
+  const rows = arr(await getData("/api/v2/spot/market/fills", { symbol, limit: 1 }, o), "trades");
+  if (rows.length === 0) return null;
+  return num(obj(rows[0], "trade")["ts"], "ts");
+}
+
+export interface OrderBook {
+  bids: BookLevel[];
+  asks: BookLevel[];
+  ts: number;
+}
+
+export async function fetchOrderBook(symbol: string, limit: number, o: MarketOptions = {}): Promise<OrderBook> {
+  const d = obj(await getData(BITGET_PATHS.orderBook, { symbol, type: "step0", limit }, o), "order book");
+  const levels = (x: unknown, what: string): BookLevel[] =>
+    arr(x, what).map((l) => {
+      const p = arr(l, "level");
+      return { price: num(p[0], "price"), size: num(p[1], "size") };
+    });
+  return { bids: levels(d["bids"], "bids"), asks: levels(d["asks"], "asks"), ts: num(d["ts"], "ts") };
+}
+
+function parseCandle(x: unknown): Candle {
+  const r = arr(x, "candle");
+  return { t: num(r[0], "t"), open: num(r[1], "open"), high: num(r[2], "high"), low: num(r[3], "low"), close: num(r[4], "close") };
+}
+
+/** Largest page Bitget returns for hourly history. Source: Bitget history-candles docs (limit up to 200). */
+const CANDLE_PAGE = 200;
+
+/** Hourly candles from `fromMs` to `toMs`, oldest first, walking backwards page by page. */
+export async function fetchHourlyHistory(symbol: string, fromMs: number, toMs: number, o: MarketOptions = {}): Promise<Candle[]> {
+  const seen = new Map<number, Candle>();
+  let end = toMs;
+  for (let guard = 0; guard < 1000; guard++) {
+    const page = arr(
+      await getData(BITGET_PATHS.historyCandles, { symbol, granularity: HISTORY_GRANULARITY, endTime: end, limit: CANDLE_PAGE }, o),
+      "candles",
+    ).map(parseCandle);
+    if (page.length === 0) break;
+    for (const c of page) if (c.t >= fromMs && c.t <= toMs) seen.set(c.t, c);
+    const oldest = Math.min(...page.map((c) => c.t));
+    if (oldest <= fromMs || oldest >= end) break;
+    end = oldest;
+  }
+  return [...seen.values()].sort((a, b) => a.t - b.t);
+}
+
+/** True constant helper re-exported for callers that step by hours. */
+export const HOUR_MS = MS_PER_HOUR;
