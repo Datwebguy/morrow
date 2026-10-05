@@ -15,7 +15,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "build": "npm run build --workspaces --if-present",
-    "replay": "npm run replay --workspace scripts/replay"
+    "replay": "npm run replay --workspace scripts/replay",
+    "start": "npm run start --workspace apps/worker"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
@@ -33,5 +34,8 @@
     "typescript": "^5.6.0",
     "typescript-eslint": "^8.0.0",
     "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=22.13"
   }
 }
