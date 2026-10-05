@@ -9,7 +9,7 @@ const paths = rest.length ? rest : ["/app/connect", "/app", "/app/activity", "/a
 const sizes = { desktop: { width: 1280, height: 800 }, mobile: { width: 390, height: 844 } };
 mkdirSync(out, { recursive: true });
 
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args: ["--no-sandbox"] });
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args: process.env["IGNORE_CERT"] === "1" ? ["--no-sandbox", "--ignore-certificate-errors"] : ["--no-sandbox"] });
 for (const scheme of ["light", "dark"]) {
   for (const [name, viewport] of Object.entries(sizes)) {
     const ctx = await browser.newContext({ viewport, colorScheme: scheme, reducedMotion: "reduce" });

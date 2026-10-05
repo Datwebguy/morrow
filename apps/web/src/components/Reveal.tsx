@@ -19,23 +19,20 @@ export function Reveal({ children, delay = 0, className = "" }: { children: Reac
   );
 }
 
-/** A headline whose words rise in one by one on first view (40 ms apart). */
+/**
+ * A headline whose words rise in one by one on first view (40 ms apart). Pure CSS, so the words are in the page from the
+ * first byte and nothing waits for scripts. The global reduced-motion rule makes it instant.
+ */
 export function Words({ text, className = "", as: Tag = "h1" }: { text: string; className?: string; as?: "h1" | "h2" | "h3" }) {
-  const reduce = useReducedMotion();
   const words = text.split(" ");
   return (
     <Tag className={className} aria-label={text}>
       {words.map((w, i) => (
         <span key={i} className="inline-block overflow-hidden align-bottom" aria-hidden>
-          <motion.span
-            className="inline-block"
-            initial={reduce ? false : { y: "105%", opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.55, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] }}
-          >
+          <span className="word-rise inline-block" style={{ animationDelay: `${i * 40}ms` }}>
             {w}
-            {i < words.length - 1 ? " " : ""}
-          </motion.span>
+            {i < words.length - 1 ? "\u00A0" : ""}
+          </span>
         </span>
       ))}
     </Tag>

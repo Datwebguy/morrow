@@ -110,6 +110,15 @@ h1, h2, h3 {
   100% { background-position: -200% 0; }
 }
 
+.word-rise {
+  animation: word-rise 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes word-rise {
+  from { transform: translateY(105%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

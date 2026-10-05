@@ -4,7 +4,7 @@ import { chromium } from "playwright-core";
 
 const [site, ...rest] = process.argv.slice(2);
 const paths = rest.length ? rest : ["/", "/record", "/pricing", "/risks"];
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args: ["--no-sandbox"] });
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args: process.env["IGNORE_CERT"] === "1" ? ["--no-sandbox", "--ignore-certificate-errors"] : ["--no-sandbox"] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 let bad = 0;
 for (const p of paths) {

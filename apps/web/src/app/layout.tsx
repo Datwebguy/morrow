@@ -1,9 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { GeistMono } from "geist/font/mono";
+import localFont from "next/font/local";
 import { GeistSans } from "geist/font/sans";
 import type { ReactNode } from "react";
 import { Providers } from "@/components/Providers";
 import "./globals.css";
+
+// Geist Mono from the geist package, loaded the same way the package does, but not preloaded: numbers sit below the
+// fold on the public pages, and a second preloaded font competes with the page's scripts on slow connections.
+const GeistMono = localFont({
+  src: "../../../../node_modules/geist/dist/fonts/geist-mono/GeistMono-Variable.woff2",
+  variable: "--font-geist-mono",
+  adjustFontFallback: false,
+  preload: false,
+  fallback: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Liberation Mono", "DejaVu Sans Mono", "Courier New", "monospace"],
+  weight: "100 900",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env["NEXT_PUBLIC_SITE_URL"] ?? "http://localhost:3000"),
