@@ -99,7 +99,7 @@ export function PublicShadowView() {
       {[...byToken.entries()].map(([coin, loans]) => (
         <section key={coin} aria-label={`${coin} simulated loans`}>
           <h2 className="mb-3 text-lg">{coin}</h2>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2">
             {loans.map((l) => (
               <Card key={l.orderId} loan={l} />
             ))}
