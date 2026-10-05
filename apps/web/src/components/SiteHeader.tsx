@@ -12,8 +12,8 @@ export function SiteHeader() {
         <Link href="/#how" className="hidden rounded-full px-3 py-2 text-sm text-muted hover:text-ink md:inline-block">
           How it works
         </Link>
-        <Link href="/check" className="hidden rounded-full px-3 py-2 text-sm text-muted hover:text-ink sm:inline-block">
-          Check my loan
+        <Link href="/watch" className="hidden rounded-full px-3 py-2 text-sm text-muted hover:text-ink sm:inline-block">
+          Watch a weekend
         </Link>
         <Link href="/record" className="hidden rounded-full px-3 py-2 text-sm text-muted hover:text-ink sm:inline-block">
           Record
@@ -22,8 +22,8 @@ export function SiteHeader() {
           FAQ
         </Link>
         <ThemeToggle />
-        <Link href="/app" className="ml-1 inline-flex h-10 items-center rounded-full bg-accent px-4 text-sm font-medium text-on-accent">
-          Protect my loan
+        <Link href="/check" className="ml-1 inline-flex h-10 items-center rounded-full bg-accent px-4 text-sm font-medium text-on-accent">
+          Check my loan
         </Link>
       </nav>
     </header>

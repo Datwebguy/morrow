@@ -61,11 +61,15 @@ Live record: starts with the first real protected closure. Until then the site s
 
 Built and tested: core logic (loan maths, reopen risk, price trust, sizing, rules), a Bitget layer that refuses forbidden calls, the history replay, a worker (monitoring, sealed promises, grading, Ask me first and Protect automatically, Pause all, Disconnect), the app, the public site and record page. Lint, typecheck, 183 tests and the production build pass. Lighthouse on the home page: 95 mobile and 100 desktop for performance, 100 for accessibility.
 
-Also built: **Check my loan** (`/check`), open to everyone with no login. A visitor types the stock token, the backing amount and the amount borrowed, and Morrow shows loan health, the distance to the margin-call and liquidation levels, the projected loan health at the next reopen, the price trust result and the smallest suggested action, all from live Bitget prices, live loan limits and the stock's own reopening history. It touches no account, asks for no keys and stores nothing.
+Also built, all public with no login:
+
+- **Check my loan** (`/check`): type the stock token, the backing amount and the amount borrowed, and Morrow shows loan health, the distance to the margin-call and liquidation levels, the projected loan health at the next reopen, the price trust result and the smallest suggested action, from live Bitget prices, live loan limits and the stock's own reopening history. It touches no account, asks for no keys and stores nothing. The token picker searches tickers and company names (names come from Nasdaq's official symbol directory, because Bitget's listing has none).
+- **Watch a weekend** (`/watch`): press Start and watch Morrow's real check-and-decide cycle handle one real past weekend from real Bitget hourly prices: the promise is sealed, the weekend price moves, Morrow projects the reopen, the AI decides and explains in one line, the action, the reopen, and the grade. The loan is simulated and labelled "Simulated loan, real prices". It opens on the most dramatic real closure in the replay data and any other stock token can be picked.
+- **The record** (`/record`) opens on the replay headline, then the sealed promises, with the full decision log to download as CSV or JSON (every row says simulated or live).
 
 Version 1 scope, said plainly: Morrow acts only on the owner's one connected Bitget account. It never collects or stores anyone else's keys. Multi-user protection is the next step and depends on Bitget's Agentic-account OAuth (`docs/VERIFIED.md`, item 2).
 
-The worker is hosted and running in dry-run mode. No real loan has been protected yet. Bitget's demo environment has no Crypto Loans (`docs/VERIFIED.md`, item 3), so the log runs as a **shadow ledger**: one simulated loan, live prices and live loan limits, previews only, every entry labelled simulated and never counted in the public totals. The owner's one real, small loan follows in "Ask me first" mode with dry run on, and nothing goes live until the owner says "go live". Other Bitget facts still need a working key (see `docs/VERIFIED.md`): which price Crypto Loans use while the market is closed, whether an Agentic account can operate loans, and the exact field names of the loan responses.
+The worker is hosted and running in dry-run mode. No real loan has been protected yet. Bitget's demo environment has no Crypto Loans (`docs/VERIFIED.md`, item 3), so the log runs as a **shadow ledger**: simulated loans on the five stock tokens with the most trading (Bitget publishes no "most borrowed" figure), each opened at three points between the live start and margin-call levels, with live prices, live loan limits and previews only. Each closure it opens a fresh set, seals a promise for every loan an hour before the close, projects, decides and grades. Every entry is labelled simulated and never counted in the public totals. Next market closure after the deadline: the first sealed shadow promises appear on Friday 9 October 2026, one hour before the 20:00 UTC close, after the 8 October deadline, so the submission leans on the replay and Watch a weekend. The owner's one real, small loan follows in "Ask me first" mode with dry run on, and nothing goes live until the owner says "go live". Other Bitget facts still need a working key (see `docs/VERIFIED.md`): which price Crypto Loans use while the market is closed, whether an Agentic account can operate loans, and the exact field names of the loan responses.
 
 ### 5. Deliverables
 
@@ -97,6 +101,9 @@ Website: https://themorrow.vercel.app
 App: https://themorrow.vercel.app/app
 Public record: https://themorrow.vercel.app/record
 Check my loan (no login): https://themorrow.vercel.app/check
+Watch a weekend (no login): https://themorrow.vercel.app/watch
+Decision log (CSV): https://worker-production-b8c5.up.railway.app/public/log.csv
+Decision log (JSON): https://worker-production-b8c5.up.railway.app/public/log.json
 Repository: https://github.com/Datwebguy/morrow
 Replay report (data): https://themorrow.vercel.app/replay-report.json
 Replay method: https://github.com/Datwebguy/morrow/blob/HEAD/docs/METHOD.md
@@ -119,5 +126,5 @@ Demo Day and K3 subsidy: your choice. Not filled in.
 1. Post the X post. Without it the entry is invalid.
 2. Record the video from `docs/VIDEO_SCRIPT.md` and add its link.
 3. Check `/public/health` on the worker shows the Gemini model name, and name that model in the form. If it says "rules only", say "rules only".
-4. The app behind "Connect Bitget" is the owner's own account only. Show `/check` (public) and the shadow ledger (`/public/shadow` on the worker) in the video, and label anything simulated as simulated.
+4. The app behind "Connect Bitget" is the owner's own account only. In the video, show `/check`, `/watch` (press Start), `/record` and the public view at `/app`, and label anything simulated as simulated.
 5. If you connect a real loan, run it in Ask me first mode with dry run until you decide to go live, and replace the simulated case with your own.

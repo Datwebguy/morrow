@@ -57,9 +57,9 @@ describe("check my loan: result", () => {
 });
 
 describe("check my loan: public route", () => {
-  async function start(opts: { tokens?: string[] | "fail" } = {}) {
+  async function start(opts: { tokens?: Array<{ coin: string; name: string | null }> | "fail" } = {}) {
     const w = world();
-    const tokens = opts.tokens ?? [COIN];
+    const tokens = opts.tokens ?? [{ coin: COIN, name: null }];
     const server = createServer({
       ...w.deps, appToken: "secret", allowedOrigin: "https://app.test", connected: true,
       listTokens: async () => (tokens === "fail" ? Promise.reject(new Error("down")) : tokens),
@@ -95,8 +95,8 @@ describe("check my loan: public route", () => {
     expect((await bad.json()).error).toMatch(/above zero/);
   });
   it("lists the live token list, or says it is unavailable", async () => {
-    const ok = await start({ tokens: ["rA", "rB"] });
-    expect((await (await fetch(`${ok.base}/public/check/tokens`)).json()).tokens).toEqual(["rA", "rB"]);
+    const ok = await start({ tokens: [{ coin: "rA", name: "Alpha Inc." }, { coin: "rB", name: null }] });
+    expect((await (await fetch(`${ok.base}/public/check/tokens`)).json()).tokens).toEqual([{ coin: "rA", name: "Alpha Inc." }, { coin: "rB", name: null }]);
     const down = await start({ tokens: "fail" });
     expect((await fetch(`${down.base}/public/check/tokens`)).status).toBe(503);
   });

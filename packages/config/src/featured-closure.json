@@ -1,0 +1,12 @@
+{
+  "source": "scripts/replay/src/featured.ts: biggest gap down from the last close to the reopen price, from Bitget hourly candles, among closures with enough earlier history",
+  "generatedAt": "2026-10-05T15:46:16.484Z",
+  "replayGeneratedAt": "2026-10-05T09:00:00.000Z",
+  "featured": {
+    "coin": "rSNXX",
+    "symbol": "RSNXXUSDT",
+    "closeTs": 1787342400000,
+    "reopenTs": 1787578200000,
+    "move": -0.21007002334111358
+  }
+}

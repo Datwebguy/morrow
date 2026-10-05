@@ -1,9 +1,10 @@
 import {
-  fetchCollateralStocks, fetchHourlyHistory, fetchLastTradeMs, fetchLoanCoins, fetchOrderBook, fetchQuote, fetchStockTokens, MorrowBitget, sdkTransport,
+  fetchCollateralStocks, fetchTradedValues, fetchHourlyHistory, fetchLastTradeMs, fetchLoanCoins, fetchOrderBook, fetchQuote, fetchStockTokens, MorrowBitget, sdkTransport,
   type Transport,
 } from "@morrow/bitget";
 import { BITGET_BASE_URL, BITGET_PATHS, MS_PER_HOUR } from "@morrow/config";
 import { parseBalances, parseLoans } from "./loans";
+import type { CompanyNames } from "./names";
 import type { Balances, LoanRead, MarketPort, Ports } from "./ports";
 
 export interface Keys {
@@ -20,10 +21,20 @@ export function keysFromEnv(env: NodeJS.ProcessEnv): Keys | null {
   return apiKey && secretKey && passphrase ? { apiKey, secretKey, passphrase } : null;
 }
 
-/** Stock tokens Bitget accepts as loan backing and lists as online right now. Read live, never typed in. */
-export async function liveBackingTokens(): Promise<string[]> {
-  const stocks = await fetchCollateralStocks();
-  return stocks.filter((s) => s.online).map((s) => s.baseCoin).sort((a, b) => a.localeCompare(b));
+/** Stock tokens Bitget accepts as loan backing and lists as online right now, with company names where the directory has one. Read live. */
+export async function liveBackingTokens(names: CompanyNames): Promise<Array<{ coin: string; name: string | null }>> {
+  const stocks = (await fetchCollateralStocks()).filter((s) => s.online).sort((a, b) => a.baseCoin.localeCompare(b.baseCoin));
+  return Promise.all(stocks.map(async (s) => ({ coin: s.baseCoin, name: await names.nameOf(s.baseCoin) })));
+}
+
+/** The stock tokens with the most trading in the last 24 hours that Bitget accepts as backing. Bitget publishes no "most borrowed" figure, so this is the nearest live measure. */
+export async function liveMostTraded(count: number): Promise<string[]> {
+  const [stocks, traded] = await Promise.all([fetchCollateralStocks(), fetchTradedValues()]);
+  return stocks
+    .filter((s) => s.online && (traded.get(s.symbol) ?? 0) > 0)
+    .sort((a, b) => (traded.get(b.symbol) ?? 0) - (traded.get(a.symbol) ?? 0))
+    .slice(0, count)
+    .map((s) => s.baseCoin);
 }
 
 export function liveMarket(): MarketPort {

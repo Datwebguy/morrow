@@ -153,3 +153,56 @@ export interface CheckResult {
   suggestion: { payDown: number; addBacking: number; ratioAfter: number; targetRatio: number } | null;
   problems: string[];
 }
+
+/** A stock token Bitget accepts as backing, with its company name when the directory has one. */
+export interface TokenOption {
+  coin: string;
+  name: string | null;
+}
+
+/** "Watch a weekend": one real closure replayed with a simulated loan. */
+export interface WatchStep {
+  id: "seal" | "weekend" | "project" | "decide" | "act" | "reopen" | "grade";
+  at: number;
+  title: string;
+  line: string;
+  facts: Array<{ label: string; value: string }>;
+}
+
+export interface WatchResult {
+  label: string;
+  token: string;
+  symbol: string;
+  closure: { closeTs: number; reopenTs: number; closeDate: string; reopenDate: string };
+  reopenMove: number;
+  loan: { backingAmount: number; backingValue: number; debt: number; startHealth: number; idleBorrowed: number; basis: "standard" | "yours" };
+  limits: { marginCall: number; liquidation: number };
+  decidedBy: string;
+  prices: Array<{ t: number; price: number }>;
+  steps: WatchStep[];
+  outcome: { kept: boolean | null; healthWithMorrow: number | null; healthWithoutMorrow: number | null; marginCallWithoutMorrow: boolean | null; paidDown: number };
+  notes: string[];
+}
+
+/** The shadow ledger as the public sees it. Every loan is simulated. */
+export interface ShadowLoanView extends LoanView {
+  simulated: true;
+  startHealth: number;
+  openedAt: number;
+  lastDecision: { ts: number; kind: string; reason: string } | null;
+}
+
+export interface ShadowView {
+  simulated: true;
+  loans: ShadowLoanView[];
+  closure: { closeTs: number; reopenTs: number } | null;
+  asOf?: number;
+}
+
+export interface FeaturedClosure {
+  coin: string;
+  symbol: string;
+  closeTs: number;
+  reopenTs: number;
+  move: number;
+}

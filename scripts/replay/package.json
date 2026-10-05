@@ -7,7 +7,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "tsc --noEmit -p tsconfig.json",
     "replay": "tsx src/run.ts",
-    "shadow-closure": "tsx src/shadow-closure.ts"
+    "shadow-closure": "tsx src/shadow-closure.ts",
+    "featured": "tsx src/featured.ts"
   },
   "dependencies": {
     "@morrow/bitget": "*",

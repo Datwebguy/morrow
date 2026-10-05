@@ -4,9 +4,12 @@ import { ApprovalCard } from "@/components/ApprovalCard";
 import { EmptyState, ErrorNote } from "@/components/EmptyState";
 import { Gate } from "@/components/Gate";
 import { LoanCard } from "@/components/LoanCard";
-import { LoanCardSkeleton } from "@/components/Skeleton";
+import { PublicShadowView } from "@/components/PublicShadowView";
+import { LoanCardSkeleton, Skeleton } from "@/components/Skeleton";
 import type { Approval, LoansResponse } from "@/lib/types";
 import { useApi } from "@/lib/useApi";
+import { useKey } from "@/lib/useKey";
+import Link from "next/link";
 
 function Loans() {
   const loans = useApi<LoansResponse>("/api/loans");
@@ -58,6 +61,22 @@ function Loans() {
 }
 
 export default function Home() {
+  const key = useKey();
+  if (key === undefined) return <Skeleton className="h-40 w-full" />;
+  if (!key) {
+    return (
+      <>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-2xl sm:text-3xl">Live simulated loans</h1>
+          <Link href="/app/connect" className="shrink-0 pt-2 text-sm text-muted underline underline-offset-2 hover:text-ink">
+            Owner sign-in
+          </Link>
+        </div>
+        <p className="mb-6 mt-1 text-sm text-muted">Simulated loans on live Bitget prices. Not a real account.</p>
+        <PublicShadowView />
+      </>
+    );
+  }
   return (
     <>
       <h1 className="text-2xl sm:text-3xl">Your loans</h1>

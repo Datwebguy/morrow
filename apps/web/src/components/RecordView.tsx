@@ -22,6 +22,7 @@ function Row({ p }: { p: PublicPromise }) {
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="text-base">
           {dateOnly(p.closeTs)} · {p.backingCoin} · {p.sizeBand}
+          {p.simulated ? <span className="ml-2 text-sm font-medium text-accent">Simulated</span> : null}
         </h3>
         <Chip p={p} />
       </div>
@@ -61,54 +62,68 @@ function Row({ p }: { p: PublicPromise }) {
   );
 }
 
+const SHOWN_AT_FIRST = 6;
+
+/** The live record: real sealed promises when there are any, then the shadow ledger's simulated ones, labelled. Never a row of zeros. */
 export function RecordView() {
   const { data, failed, loading } = usePublicRecord();
+  const [all, setAll] = useState(false);
   if (!WORKER_URL) {
-    return <EmptyState title="Starting" line="The live record starts with the first protected closure. It will appear here, newest first." />;
+    return <EmptyState title="Starting" line="The live record starts with the next market closure. It will appear here, newest first." />;
   }
   if (loading) return <RowSkeleton />;
   if (failed || !data) return <EmptyState title="The record could not load" line="Try again in a minute. Nothing has been changed." />;
   const t = data.totals;
+  const sim = [...data.simulated].sort((a, b) => b.closeTs - a.closeTs || a.backingCoin.localeCompare(b.backingCoin));
+  const simGraded = sim.filter((p) => p.status === "graded");
   const stats = [
-    { label: "Promises sealed", value: t.promises },
     { label: "Promises kept", value: t.kept },
     { label: "Margin calls avoided", value: t.marginCallsAvoided },
     { label: "Liquidations avoided", value: t.liquidationsAvoided },
   ];
+  if (data.promises.length === 0 && sim.length === 0) {
+    return <EmptyState title="The first promises are sealed before the next closure" line="Morrow seals one promise per simulated loan an hour before the US market closes, then grades it after the reopen." />;
+  }
   return (
     <>
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line lg:grid-cols-5">
-        {stats.map((s) => (
-          <div key={s.label} className="flex flex-col justify-between gap-2 bg-surface px-5 py-4">
-            <dt className="text-sm text-muted">{s.label}</dt>
-            <dd className="text-2xl font-semibold">{t.graded > 0 || s.label === "Promises sealed" ? <CountNumber value={s.value} format={(n) => String(Math.round(n))} /> : "Starting"}</dd>
+      {t.graded > 0 ? (
+        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line lg:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label} className="flex flex-col justify-between gap-2 bg-surface px-5 py-4">
+              <dt className="text-sm text-muted">{s.label}</dt>
+              <dd className="text-2xl font-semibold"><CountNumber value={s.value} format={(n) => String(Math.round(n))} /></dd>
+            </div>
+          ))}
+          <div className="flex flex-col justify-between gap-2 bg-surface px-5 py-4">
+            <dt className="text-sm text-muted">Total cost</dt>
+            <dd className="text-2xl font-semibold"><CountNumber value={t.totalCost} format={(n) => amount(n, "USDT")} /></dd>
           </div>
-        ))}
-        <div className="col-span-2 flex flex-col justify-between gap-2 bg-surface px-5 py-4 lg:col-span-1">
-          <dt className="text-sm text-muted">Total cost</dt>
-          <dd className="text-2xl font-semibold">{t.graded > 0 ? <CountNumber value={t.totalCost} format={(n) => amount(n, "USDT")} /> : "Starting"}</dd>
-        </div>
-      </dl>
-      {data.promises.length === 0 ? (
-        <div className="mt-8">
-          <EmptyState title="No promises yet" line="Morrow seals a promise for each protected loan before every weekend or holiday. The first one will show here." />
-        </div>
-      ) : (
+        </dl>
+      ) : null}
+      {data.promises.length > 0 ? (
         <ul className="mt-8 space-y-4">
           {data.promises.map((p) => (
             <Row key={p.id} p={p} />
           ))}
         </ul>
-      )}
-      {data.simulated.length > 0 ? (
-        <details className="mt-8 rounded-2xl border border-line bg-surface p-5">
-          <summary className="cursor-pointer text-sm font-medium">Practice runs (simulated, not counted above)</summary>
+      ) : null}
+      {sim.length > 0 ? (
+        <div className={data.promises.length > 0 ? "mt-10" : ""}>
+          <h3 className="text-xl">Shadow ledger <span className="ml-2 align-middle text-sm font-medium text-accent">Simulated</span></h3>
+          <p className="mt-1 max-w-2xl text-sm text-muted">
+            Simulated loans on the most traded stock tokens, with live Bitget prices and loan limits. <span className="num">{sim.length}</span> promises sealed, <span className="num">{simGraded.length}</span> graded. Not counted as real results.
+          </p>
           <ul className="mt-4 space-y-4">
-            {data.simulated.map((p) => (
+            {(all ? sim : sim.slice(0, SHOWN_AT_FIRST)).map((p) => (
               <Row key={p.id} p={p} />
             ))}
           </ul>
-        </details>
+          {sim.length > SHOWN_AT_FIRST ? (
+            <button type="button" onClick={() => setAll((v) => !v)} className="mt-4 inline-flex h-11 items-center rounded-full border border-muted/50 px-5 text-sm font-medium text-ink hover:bg-line/60">
+              {all ? "Show fewer" : `Show all ${sim.length}`}
+            </button>
+          ) : null}
+        </div>
       ) : null}
     </>
   );

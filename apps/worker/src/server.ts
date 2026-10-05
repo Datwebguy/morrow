@@ -1,15 +1,17 @@
 import { timingSafeEqual } from "node:crypto";
 import { createServer as httpServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
-import { NYSE_CALENDAR } from "@morrow/config";
+import { CHECK_MY_LOAN, FEATURED_CLOSURE, NYSE_CALENDAR, WATCH_A_WEEKEND } from "@morrow/config";
 import { currentOrNextClosure, type MarketClosure } from "@morrow/core";
-import { CHECK_MY_LOAN } from "@morrow/config";
 import { approve, reject, type ApproveDeps } from "./approve";
-import { assessLoan, type Assessment } from "./assess";
+import { assessLoan, type Assessment, type ProfileCache } from "./assess";
 import { checkLoan, CheckError, parseCheckInput, RateLimiter } from "./check";
 import type { Store } from "./db";
+import { logRows, toCsv } from "./logexport";
+import type { Ports } from "./ports";
 import { publicRecord } from "./record";
 import { loadSettings, SettingsError, updateSettings } from "./settings";
-import { clearShadow, loadShadow, saveShadow, ShadowError } from "./shadow";
+import { loadBook } from "./shadow";
+import { watchKey, watchWeekend, WatchError, type WatchInput, type WatchResult } from "./watch";
 
 export interface ServerDeps extends ApproveDeps {
   /** Secret the app sends. Without it, private routes are closed. */
@@ -18,10 +20,10 @@ export interface ServerDeps extends ApproveDeps {
   allowedOrigin: string | null;
   /** True when Bitget credentials exist on the server. Whether the user has connected is a separate switch. */
   connected: boolean;
-  /** Stock tokens Bitget accepts as backing right now, for the public "Check my loan" picker. Absent: the picker is closed. */
-  listTokens?: () => Promise<string[]>;
-  /** The shadow ledger's own store (its simulated loan, log and promises). Absent: no shadow ledger. */
-  shadowStore?: Store;
+  /** Stock tokens Bitget accepts as backing right now, with company names where known, for the public pickers. Absent: the picker is closed. */
+  listTokens?: () => Promise<Array<{ coin: string; name: string | null }>>;
+  /** The shadow ledger: its own store (simulated loans, log, promises), its own ports and the shared price-history cache. Absent: no shadow ledger. */
+  shadow?: { store: Store; ports: Ports; cache: ProfileCache };
   /** The model that makes the AI choice ("rules only" when none is set). Shown on the public health route, never the key. */
   modelName?: string;
 }
@@ -76,18 +78,55 @@ function clientAddress(req: IncomingMessage): string {
   return forwarded || req.socket.remoteAddress || "unknown";
 }
 
-/** The shadow ledger's paper log in the format the hackathon form asks for. Every row is simulated. */
-function shadowLog(store: Store | undefined): unknown {
-  if (!store) return { simulated: true, entries: [] };
-  const entries = store.allLog().filter((e) => e.kind === "action" || e.kind === "refused" || e.kind === "promise" || e.kind === "grade")
-    .map((e) => ({ timestamp: e.ts, kind: e.kind, instrument: e.instrument, direction: e.direction, price: e.price, quantity: e.quantity, balanceChange: e.balanceChange, reason: e.reason, simulated: true }));
-  return { simulated: true, entries };
+function parseWatchQuery(q: URLSearchParams): WatchInput {
+  const token = q.get("token");
+  if (!token || !/^[A-Za-z0-9]{2,20}$/.test(token.trim())) throw new SettingsError("Choose a stock token.");
+  const input: WatchInput = { backingCoin: token.trim() };
+  const backing = q.get("backing");
+  const borrowed = q.get("borrowed");
+  if (backing !== null || borrowed !== null) {
+    const b = Number(backing);
+    const dbt = Number(borrowed);
+    if (!(b > 0) || !(dbt > 0) || b > CHECK_MY_LOAN.maxAmount || dbt > CHECK_MY_LOAN.maxAmount) throw new SettingsError("Backing amount and amount borrowed must be numbers above zero.");
+    input.yours = { backingAmount: b, debt: dbt };
+  }
+  const closeTs = q.get("closeTs");
+  if (closeTs !== null) {
+    if (!Number.isFinite(Number(closeTs))) throw new SettingsError("That weekend is not valid.");
+    input.closeTs = Number(closeTs);
+  }
+  return input;
+}
+
+/** The live shadow-ledger loans for the public view: loan health, next closure, and the latest decision for each. Every loan is simulated. */
+async function shadowView(d: ServerDeps): Promise<unknown> {
+  if (!d.shadow) return { simulated: true, loans: [], closure: null };
+  const { store, ports, cache } = d.shadow;
+  const settings = loadSettings(store);
+  let closure: MarketClosure | null = null;
+  try {
+    closure = currentOrNextClosure(NYSE_CALENDAR, ports.nowMs());
+  } catch {
+    closure = null;
+  }
+  const loans = [];
+  for (const l of loadBook(store).loans) {
+    const a = await assessLoan(ports, cache, { orderId: l.id, loanCoin: CHECK_MY_LOAN.loanCoin, backingCoin: l.backingCoin, debt: l.debt, backingAmount: l.backingAmount }, settings, closure);
+    const last = store.recentLog(1, l.id)[0];
+    loans.push({
+      ...(loanView(a, true) as object), simulated: true, startHealth: l.startHealth, openedAt: l.openedAt,
+      lastDecision: last ? { ts: last.ts, kind: last.kind, reason: last.reason } : null,
+    });
+  }
+  return { simulated: true, loans, closure: closure ? { closeTs: closure.closeTs, reopenTs: closure.reopenTs } : null, asOf: ports.nowMs() };
 }
 
 /** The worker's small HTTP surface: a public record, and private routes for the app. */
 export function createServer(d: ServerDeps): Server {
   let loansCache: { at: number; body: unknown } | null = null;
   const limiter = new RateLimiter(CHECK_MY_LOAN.requestsPerMinute);
+  const watchLimiter = new RateLimiter(WATCH_A_WEEKEND.requestsPerMinute);
+  const watchCache = new Map<string, { at: number; promise: Promise<WatchResult> }>();
   return httpServer(async (req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost");
     const path = url.pathname;
@@ -99,14 +138,46 @@ export function createServer(d: ServerDeps): Server {
         return void res.end();
       }
       if (req.method === "GET" && path === "/public/health") return send(res, 200, { ok: true, now: d.ports.nowMs(), model: d.modelName ?? "rules only" }, publicCors);
-      if (req.method === "GET" && path === "/public/record") return send(res, 200, publicRecord(d.store, d.shadowStore), publicCors);
-      if (req.method === "GET" && path === "/public/shadow") return send(res, 200, shadowLog(d.shadowStore), publicCors);
+      if (req.method === "GET" && path === "/public/record") return send(res, 200, publicRecord(d.store, d.shadow?.store), publicCors);
+      if (req.method === "GET" && path === "/public/shadow") return send(res, 200, await shadowView(d), publicCors);
+      if (req.method === "GET" && (path === "/public/log.json" || path === "/public/log.csv")) {
+        const rows = logRows(d.shadow ? [d.store, d.shadow.store] : [d.store]);
+        if (path === "/public/log.csv") {
+          res.writeHead(200, { "content-type": "text/csv; charset=utf-8", "content-disposition": 'attachment; filename="morrow-log.csv"', "cache-control": "no-store", ...publicCors });
+          return void res.end(toCsv(rows));
+        }
+        return send(res, 200, { generatedAt: d.ports.nowMs(), note: "Every decision Morrow logged. mode is simulated or live on every row.", rows }, { ...publicCors, "content-disposition": 'attachment; filename="morrow-log.json"' });
+      }
       if (req.method === "GET" && path === "/public/check/tokens") {
         if (!d.listTokens) return send(res, 503, { error: "The token list is not available right now." }, publicCors);
         try {
           return send(res, 200, { asOf: d.ports.nowMs(), tokens: await d.listTokens() }, publicCors);
         } catch {
           return send(res, 503, { error: "Bitget's token list could not be read right now. Try again in a minute." }, publicCors);
+        }
+      }
+      if (req.method === "GET" && path === "/public/watch/featured") return send(res, 200, { featured: FEATURED_CLOSURE.featured }, publicCors);
+      if (req.method === "GET" && path === "/public/watch") {
+        const q = url.searchParams;
+        let input: WatchInput;
+        try {
+          input = parseWatchQuery(q);
+        } catch (e) {
+          return send(res, 400, { error: e instanceof Error ? e.message : "Check the token and numbers." }, publicCors);
+        }
+        const key = watchKey(input);
+        const hit = watchCache.get(key);
+        if (!hit || Date.now() - hit.at > WATCH_A_WEEKEND.cacheMinutes * 60_000) {
+          if (!watchLimiter.allow(clientAddress(req))) return send(res, 429, { error: "Too many replays from this address. Wait a minute and try again." }, publicCors);
+          const promise = watchWeekend(d.ports, d.advisor, input);
+          watchCache.set(key, { at: Date.now(), promise });
+          promise.catch(() => watchCache.delete(key));
+        }
+        try {
+          return send(res, 200, await watchCache.get(key)!.promise, publicCors);
+        } catch (e) {
+          if (e instanceof WatchError) return send(res, 400, { error: e.message }, publicCors);
+          return send(res, 503, { error: "Bitget price history could not be read right now. Try again in a minute." }, publicCors);
         }
       }
       if (req.method === "POST" && path === "/public/check") {
@@ -159,15 +230,6 @@ export function createServer(d: ServerDeps): Server {
         loansCache = { at: Date.now(), body };
         return send(res, 200, body, cors);
       }
-      if (path === "/api/shadow") {
-        if (!d.shadowStore) return send(res, 503, { error: "The shadow ledger is not set up on the server." }, cors);
-        if (req.method === "GET") return send(res, 200, { loan: loadShadow(d.shadowStore), settings: loadSettings(d.shadowStore) }, cors);
-        if (req.method === "PUT") return send(res, 200, { loan: saveShadow(d.shadowStore, await readJson(req)) }, cors);
-        if (req.method === "DELETE") {
-          clearShadow(d.shadowStore);
-          return send(res, 200, { loan: null }, cors);
-        }
-      }
       if (req.method === "GET" && path === "/api/activity") {
         return send(res, 200, { entries: d.store.recentLog(Math.min(200, Number(url.searchParams.get("limit") ?? 50) || 50), url.searchParams.get("loan") ?? undefined) }, cors);
       }
@@ -202,7 +264,7 @@ export function createServer(d: ServerDeps): Server {
       }
       return send(res, 404, { error: "Not found." }, cors);
     } catch (e) {
-      if (e instanceof SettingsError || e instanceof ShadowError) return send(res, 400, { error: e.message });
+      if (e instanceof SettingsError) return send(res, 400, { error: e.message });
       return send(res, 500, { error: "Something went wrong on the server. Try again." });
     }
   });

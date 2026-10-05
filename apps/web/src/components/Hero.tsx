@@ -9,16 +9,14 @@ export function Hero() {
         <Words text="Borrow today. Still yours tomorrow." className="max-w-3xl text-5xl sm:text-6xl lg:text-7xl" />
         <p className="mt-6 max-w-lg text-lg text-muted">Morrow watches your Bitget stock loans and steps in before a margin call.</p>
         <div className="mt-9 flex flex-wrap gap-3">
-          <Link href="/app" className="inline-flex h-12 items-center rounded-full bg-accent px-6 text-base font-medium text-on-accent">
-            Protect my loan
+          <Link href="/check" className="inline-flex h-12 items-center rounded-full bg-accent px-6 text-base font-medium text-on-accent">
+            Check my loan
           </Link>
-          <Link href="/record" className="inline-flex h-12 items-center rounded-full border border-muted/50 px-6 text-base font-medium text-ink hover:bg-line/60">
-            See the record
+          <Link href="/watch" className="inline-flex h-12 items-center rounded-full border border-muted/50 px-6 text-base font-medium text-ink hover:bg-line/60">
+            Watch a weekend
           </Link>
         </div>
-        <Link href="/check" className="mt-5 inline-block text-sm font-medium text-accent underline underline-offset-2">
-          Check my loan, no login needed
-        </Link>
+        <p className="mt-4 text-sm text-muted">No login. Nothing stored.</p>
       </div>
       <PriceLine />
     </section>

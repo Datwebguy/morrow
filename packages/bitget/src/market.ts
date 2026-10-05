@@ -137,6 +137,18 @@ export async function fetchQuote(symbol: string, o: MarketOptions = {}): Promise
   };
 }
 
+/** Traded value over the last 24 hours in USDT for every spot symbol, live from Bitget. No key needed. */
+export async function fetchTradedValues(o: MarketOptions = {}): Promise<Map<string, number>> {
+  const rows = arr(await getData(BITGET_PATHS.tickers, {}, o), "tickers");
+  const out = new Map<string, number>();
+  for (const x of rows) {
+    const r = obj(x, "ticker");
+    const v = Number(r["usdtVolume"] ?? r["quoteVolume"]);
+    if (typeof r["symbol"] === "string" && Number.isFinite(v)) out.set(r["symbol"], v);
+  }
+  return out;
+}
+
 /** Time of the most recent trade, from Bitget's recent trades. Null when there are none. */
 export async function fetchLastTradeMs(symbol: string, o: MarketOptions = {}): Promise<number | null> {
   const rows = arr(await getData("/api/v2/spot/market/fills", { symbol, limit: 1 }, o), "trades");

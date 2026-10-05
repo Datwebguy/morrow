@@ -1,14 +1,16 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, Play } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { Countdown } from "./Countdown";
 import { Gauge } from "./Gauge";
 import { Hint } from "./Hint";
+import { TokenPicker } from "./TokenPicker";
 import { TrustBadge } from "./TrustBadge";
 import { request, WORKER_URL } from "@/lib/api";
 import { amount, dateTime, percent, points } from "@/lib/format";
-import type { CheckResult } from "@/lib/types";
+import type { CheckResult, TokenOption } from "@/lib/types";
 import { basisWord, statusWord } from "@/lib/words";
 
 const FIELD = "mt-1.5 h-12 w-full rounded-xl border border-line bg-surface px-4 text-base text-ink";
@@ -23,7 +25,7 @@ function suggestionLine(r: CheckResult): string {
 
 /** Public, no login. Three typed numbers in, live Bitget data, nothing stored. */
 export function CheckMyLoan() {
-  const [tokens, setTokens] = useState<string[] | null>(null);
+  const [tokens, setTokens] = useState<TokenOption[] | null>(null);
   const [tokensFailed, setTokensFailed] = useState(false);
   const [token, setToken] = useState("");
   const [backing, setBacking] = useState("");
@@ -35,7 +37,7 @@ export function CheckMyLoan() {
   useEffect(() => {
     if (!WORKER_URL) return;
     let alive = true;
-    request<{ tokens: string[] }>("/public/check/tokens", { key: null })
+    request<{ tokens: TokenOption[] }>("/public/check/tokens", { key: null })
       .then((d) => alive && setTokens(d.tokens))
       .catch(() => alive && setTokensFailed(true));
     return () => {
@@ -69,16 +71,7 @@ export function CheckMyLoan() {
           <label htmlFor="token" className="text-sm font-medium">
             Stock token backing your loan
           </label>
-          <select id="token" required value={token} onChange={(e) => setToken(e.target.value)} className={FIELD} disabled={!tokens}>
-            <option value="" disabled>
-              {tokensFailed ? "Token list not available right now" : tokens ? "Choose a token" : "Loading tokens"}
-            </option>
-            {(tokens ?? []).map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
+          <TokenPicker id="token" tokens={tokens} failed={tokensFailed} value={token} onChange={setToken} />
         </div>
         <div>
           <label htmlFor="backing" className="text-sm font-medium">
@@ -209,6 +202,15 @@ export function CheckMyLoan() {
               </p>
             ) : null}
             {result.problems.length > 0 && h ? <p className="mt-4 text-sm text-watch">{result.problems[0]}</p> : null}
+            <div className="mt-5 border-t border-line pt-5">
+              <Link
+                href={`/watch?${new URLSearchParams({ token: result.token, backing, borrowed }).toString()}`}
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-muted/50 px-6 text-base font-medium text-ink hover:bg-line/60 sm:w-auto"
+              >
+                <Play size={16} strokeWidth={1.75} aria-hidden /> Watch what Morrow would do on a real weekend
+              </Link>
+              <p className="mt-2 text-sm text-muted">Your loan size and loan health, replayed on a real past weekend.</p>
+            </div>
           </article>
         ) : null}
       </section>

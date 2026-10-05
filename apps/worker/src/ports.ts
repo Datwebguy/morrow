@@ -39,7 +39,8 @@ export interface Ports {
   /** True for shadow runs: every log entry and promise is labelled simulated. */
   simulated: boolean;
   loans(): Promise<LoanRead>;
-  idleBalances(): Promise<Balances>;
+  /** Idle balances. A simulated ledger holds a separate balance per loan, so it can tell which loan is asking. A real account has one balance. */
+  idleBalances(forLoan?: string): Promise<Balances>;
   /** Live limits for a backing coin, or null when Bitget does not list it. */
   limits(backingCoin: string): Promise<LoanLimits | null>;
   market: MarketPort;

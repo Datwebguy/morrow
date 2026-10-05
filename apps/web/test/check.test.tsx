@@ -27,14 +27,17 @@ afterEach(() => {
 
 function setup() {
   request.mockImplementation(async (path: string) => {
-    if (path === "/public/check/tokens") return { tokens: ["rXYZ", "rABC"] };
+    if (path === "/public/check/tokens") return { tokens: [{ coin: "rXYZ", name: "Xyz Corporation" }, { coin: "rABC", name: null }] };
     return FIXTURE;
   });
 }
 
 async function fill() {
-  await waitFor(() => expect(screen.getByRole("option", { name: "rXYZ" })).toBeInTheDocument());
-  fireEvent.change(screen.getByLabelText(/Stock token/), { target: { value: "rXYZ" } });
+  await waitFor(() => expect(screen.getByLabelText(/Stock token/)).not.toBeDisabled());
+  const picker = screen.getByLabelText(/Stock token/);
+  fireEvent.focus(picker);
+  fireEvent.change(picker, { target: { value: "xyz corp" } }); // a company name, not the ticker
+  fireEvent.mouseDown(await screen.findByRole("option", { name: /rXYZ/ }));
   fireEvent.change(screen.getByLabelText(/Backing amount/), { target: { value: "10" } });
   fireEvent.change(screen.getByLabelText(/Amount borrowed/), { target: { value: "580" } });
 }
@@ -52,13 +55,14 @@ describe("Check my loan page", () => {
     expect(screen.getByText("To margin call")).toBeInTheDocument();
     expect(screen.getByText(/Price not trusted/)).toBeInTheDocument();
     expect(screen.getByText(/Nothing you type is saved/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Watch what Morrow would do/ })).toHaveAttribute("href", "/watch?token=rXYZ&backing=10&borrowed=580");
     const text = document.body.textContent ?? "";
     expect(text).not.toMatch(/LTV|collateral|pledge|supRate|forceRate/i);
   });
 
   it("says plainly what went wrong and keeps the form", async () => {
     request.mockImplementation(async (path: string) => {
-      if (path === "/public/check/tokens") return { tokens: ["rXYZ"] };
+      if (path === "/public/check/tokens") return { tokens: [{ coin: "rXYZ", name: "Xyz Corporation" }] };
       throw new Error("Backing amount must be a number above zero.");
     });
     render(<CheckMyLoan />);
@@ -71,6 +75,6 @@ describe("Check my loan page", () => {
   it("says so when the token list cannot be read", async () => {
     request.mockRejectedValue(new Error("down"));
     render(<CheckMyLoan />);
-    await waitFor(() => expect(screen.getByRole("option", { name: /not available/ })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByPlaceholderText(/not available/)).toBeInTheDocument());
   });
 });

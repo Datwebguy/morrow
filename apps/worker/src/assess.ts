@@ -126,7 +126,7 @@ export async function assessLoan(ports: Ports, cache: ProfileCache, loan: LoanRe
   const ratios = [mid, base.lastClose].filter((p): p is number => p !== null && p > 0).map((p) => loanHealth(position, p, limits, watch));
   base.healthNow = ratios.reduce((a, b) => (b.ratio > a.ratio ? b : a));
 
-  const balances = await ports.idleBalances();
+  const balances = await ports.idleBalances(loan.orderId);
   if (balances.byCoin === null) problems.push(balances.problem ?? "Balances could not be read.");
   else base.idle = { borrowed: balances.byCoin[loan.loanCoin] ?? 0, backing: balances.byCoin[loan.backingCoin] ?? 0 };
 
