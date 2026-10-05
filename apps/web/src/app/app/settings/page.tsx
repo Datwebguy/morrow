@@ -48,7 +48,7 @@ function Form({ initial, onSaved }: { initial: Settings; onSaved: () => void }) 
   return (
     <div className="space-y-6">
       <fieldset className="rounded-2xl border border-line bg-surface p-5">
-        <legend className="px-1 text-sm font-semibold">Mode</legend>
+        <legend className="text-sm font-semibold">Mode</legend>
         {(
           [
             ["ask", "Ask me first", "Morrow sends the proposed action and waits for you to tap Approve."],
@@ -66,7 +66,7 @@ function Form({ initial, onSaved }: { initial: Settings; onSaved: () => void }) 
       </fieldset>
 
       <fieldset className="rounded-2xl border border-line bg-surface p-5">
-        <legend className="px-1 text-sm font-semibold">Allowed actions</legend>
+        <legend className="text-sm font-semibold">Allowed actions</legend>
         <label className="mt-3 flex items-center gap-3 text-sm">
           <input type="checkbox" checked={pay} onChange={(e) => setPay(e.target.checked)} className="h-4 w-4 accent-[var(--accent)]" /> Pay down
         </label>
@@ -77,8 +77,8 @@ function Form({ initial, onSaved }: { initial: Settings; onSaved: () => void }) 
       </fieldset>
 
       <fieldset className="rounded-2xl border border-line bg-surface p-5">
-        <legend className="px-1 text-sm font-semibold">Safety level</legend>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+        <legend className="text-sm font-semibold">Safety level</legend>
+        <div className="mt-3 grid items-end gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="target" className="flex items-center gap-1 text-sm">
               Stay this far below the margin-call level (points)
@@ -97,7 +97,7 @@ function Form({ initial, onSaved }: { initial: Settings; onSaved: () => void }) 
       </fieldset>
 
       <fieldset className="rounded-2xl border border-line bg-surface p-5">
-        <legend className="px-1 text-sm font-semibold">Limits (USDT)</legend>
+        <legend className="text-sm font-semibold">Limits (USDT)</legend>
         <p className="mt-2 text-sm text-muted">Morrow does nothing until you set these.</p>
         <div className="mt-3 grid gap-4 sm:grid-cols-3">
           {(
@@ -118,7 +118,7 @@ function Form({ initial, onSaved }: { initial: Settings; onSaved: () => void }) 
       </fieldset>
 
       <fieldset className="rounded-2xl border border-line bg-surface p-5">
-        <legend className="px-1 text-sm font-semibold">Alerts</legend>
+        <legend className="text-sm font-semibold">Alerts</legend>
         <p className="mt-2 text-sm text-muted">Alerts always show in the app. Telegram is optional.</p>
         <label htmlFor="telegram" className="mt-3 block text-sm">
           Telegram chat

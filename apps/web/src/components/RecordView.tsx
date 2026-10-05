@@ -79,14 +79,14 @@ export function RecordView() {
     <>
       <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line lg:grid-cols-5">
         {stats.map((s) => (
-          <div key={s.label} className="bg-surface px-5 py-4">
+          <div key={s.label} className="flex flex-col justify-between gap-2 bg-surface px-5 py-4">
             <dt className="text-sm text-muted">{s.label}</dt>
-            <dd className="mt-1 text-2xl font-semibold">{t.graded > 0 || s.label === "Promises sealed" ? <CountNumber value={s.value} format={(n) => String(Math.round(n))} /> : "Starting"}</dd>
+            <dd className="text-2xl font-semibold">{t.graded > 0 || s.label === "Promises sealed" ? <CountNumber value={s.value} format={(n) => String(Math.round(n))} /> : "Starting"}</dd>
           </div>
         ))}
-        <div className="col-span-2 bg-surface px-5 py-4 lg:col-span-1">
+        <div className="col-span-2 flex flex-col justify-between gap-2 bg-surface px-5 py-4 lg:col-span-1">
           <dt className="text-sm text-muted">Total cost</dt>
-          <dd className="mt-1 text-2xl font-semibold">{t.graded > 0 ? <CountNumber value={t.totalCost} format={(n) => amount(n, "USDT")} /> : "Starting"}</dd>
+          <dd className="text-2xl font-semibold">{t.graded > 0 ? <CountNumber value={t.totalCost} format={(n) => amount(n, "USDT")} /> : "Starting"}</dd>
         </div>
       </dl>
       {data.promises.length === 0 ? (

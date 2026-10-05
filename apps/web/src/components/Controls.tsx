@@ -1,28 +1,25 @@
-import { Ban, PauseCircle, SlidersHorizontal, WalletMinimal } from "lucide-react";
 import { Reveal } from "./Reveal";
 
-const CARDS = [
-  { Icon: SlidersHorizontal, title: "You choose the limits", line: "Limits per action, per weekend and per month." },
-  { Icon: PauseCircle, title: "Pause any time", line: "One tap stops every action at once." },
-  { Icon: Ban, title: "It never sells your stocks", line: "It can only pay down a loan or add backing." },
-  { Icon: WalletMinimal, title: "It never borrows or withdraws", line: "No new loans. No money leaving your account." },
+const ITEMS = [
+  { title: "You choose the limits", line: "How much Morrow may use per action, per weekend and per month. Until you set them, it uses nothing." },
+  { title: "Pause any time", line: "One tap stops every action at once." },
+  { title: "It never sells your stocks", line: "It can only pay down a loan or add backing." },
+  { title: "It never borrows or withdraws", line: "No new loans. No money leaving your account." },
 ] as const;
 
 export function Controls() {
   return (
-    <section aria-labelledby="controls-title" className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6">
+    <section aria-labelledby="controls-title" className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
       <Reveal>
-        <h2 id="controls-title" className="max-w-xl text-3xl sm:text-4xl">Your controls</h2>
+        <p className="text-sm font-medium text-accent">You stay in charge</p>
+        <h2 id="controls-title" className="mt-2 max-w-xl text-3xl sm:text-4xl">Your controls</h2>
       </Reveal>
-      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {CARDS.map(({ Icon, title, line }, i) => (
-          <li key={title}>
-            <Reveal delay={i * 0.06} className="h-full">
-              <div className="h-full rounded-2xl border border-line bg-surface p-6">
-                <Icon size={24} strokeWidth={1.75} className="text-ink" aria-hidden />
-                <h3 className="mt-5 text-lg">{title}</h3>
-                <p className="mt-2 text-sm text-muted">{line}</p>
-              </div>
+      <ul className="mt-12 divide-y divide-line border-y border-line">
+        {ITEMS.map((c, i) => (
+          <li key={c.title}>
+            <Reveal delay={i * 0.05} className="grid gap-2 py-7 sm:grid-cols-[1.1fr_1fr] sm:items-baseline sm:gap-10">
+              <h3 className="text-xl sm:text-2xl">{c.title}</h3>
+              <p className="max-w-md text-muted">{c.line}</p>
             </Reveal>
           </li>
         ))}

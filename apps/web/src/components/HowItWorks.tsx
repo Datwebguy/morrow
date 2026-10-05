@@ -39,14 +39,14 @@ const STEPS: Step[] = [
     visual: (
       <div aria-label="Loan health scale: safe, getting close, margin-call level">
         <div className="flex h-3 overflow-hidden rounded-full">
-          <span className="flex-[5] bg-safe" />
-          <span className="flex-[2] bg-watch" />
-          <span className="flex-[2] bg-danger" />
+          <span className="flex-[4] bg-safe" />
+          <span className="flex-[3] bg-watch" />
+          <span className="flex-[3] bg-danger" />
         </div>
         <div className="mt-2 flex text-xs text-muted">
-          <span className="flex-[5]">Safe</span>
-          <span className="flex-[2]">Getting close</span>
-          <span className="flex-[2] text-right">Margin-call level</span>
+          <span className="flex-[4]">Safe</span>
+          <span className="flex-[3]">Getting close</span>
+          <span className="flex-[3] text-right">Margin-call level</span>
         </div>
       </div>
     ),
@@ -88,9 +88,9 @@ export function HowItWorks() {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
   useMotionValueEvent(scrollYProgress, "change", (v) => setActive(Math.min(STEPS.length - 1, Math.floor(v * STEPS.length))));
   return (
-    <section id="how" aria-labelledby="how-title" className="mx-auto w-full max-w-6xl scroll-mt-8 px-4 sm:px-6">
-      <div ref={ref} className="md:h-[260vh]">
-        <div className="md:sticky md:top-0 md:flex md:h-dvh md:items-center">
+    <section id="how" aria-labelledby="how-title" className="mx-auto mt-16 w-full max-w-6xl scroll-mt-8 px-4 sm:mt-20 sm:px-6">
+      <div ref={ref} className="md:h-[230vh]">
+        <div className="md:sticky md:top-0 md:flex md:h-dvh md:items-start md:pt-[12vh]">
           <div className="grid w-full gap-10 md:grid-cols-2 md:items-center">
             <div>
               <p className="text-sm font-medium text-accent">How it works</p>

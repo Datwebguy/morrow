@@ -12,10 +12,11 @@ const INK = "#0E1116";
 const INK_DARK = "#F2F4F7";
 const CANVAS_DARK = "#0B0D12";
 
-// One continuous line: a rounded shield that also reads as a steady horizon.
-const MARK = "M2 26 H8 V10 C11 9 17 9 24 5 C31 9 37 9 40 10 V26 C40 35 33 41 24 45 C15 41 8 35 8 26 H46";
-const mark = (color, width = 3) =>
-  `<path d="${MARK}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+// The M: four strokes. A tiny "c" curl hooks onto the top-left of the left stem; the last stroke on the right is long.
+const mark = (color, width = 3.4) => {
+  const p = (d) => `<path d="${d}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return p("M 8.6 13 A 3.7 3.7 0 1 1 12 9.7 V 42") + p("M 12 9.7 L 25.5 29.5 L 39 11") + p("M 39 3.5 V 42");
+};
 
 const fontFile = readFileSync(new URL("../node_modules/geist/dist/fonts/geist-sans/Geist-SemiBold.ttf", import.meta.url));
 const font = opentype.parse(fontFile.buffer.slice(fontFile.byteOffset, fontFile.byteOffset + fontFile.byteLength));
@@ -36,7 +37,7 @@ writeFileSync(`${BRAND}mark-wordmark-white.svg`, svg(LOCKUP_W, 48, mark("#FFFFFF
 // Favicon: a heavier line so it stays readable at 16 px, and it follows the browser's theme.
 writeFileSync(
   `${OUT}favicon.svg`,
-  svg(48, 48, `<style>path{stroke:${INK}}@media (prefers-color-scheme:dark){path{stroke:${INK_DARK}}}</style>${mark(INK, 4.5).replace(`stroke="${INK}" `, "")}`),
+  svg(48, 48, `<style>path{stroke:${INK}}@media (prefers-color-scheme:dark){path{stroke:${INK_DARK}}}</style>${mark(INK, 4.6).replaceAll(`stroke="${INK}" `, "")}`),
 );
 
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args: ["--no-sandbox"] });
@@ -52,13 +53,13 @@ async function png(size, { bg, color, stroke, inset }) {
 }
 
 // App icon, home-screen icon and the large icon: the mark on the dark canvas colour.
-const app = (size) => png(size, { bg: CANVAS_DARK, color: INK_DARK, stroke: 3.2, inset: Math.round(size * 0.2) });
+const app = (size) => png(size, { bg: CANVAS_DARK, color: INK_DARK, stroke: 3.4, inset: Math.round(size * 0.2) });
 writeFileSync(`${BRAND}app-icon-1024.png`, await app(1024));
 writeFileSync(`${OUT}icon-512.png`, await app(512));
 writeFileSync(`${OUT}apple-touch-icon.png`, await app(180));
 
 // favicon.ico with 16 and 32 pixel images (PNG inside ICO).
-const fav = (size) => png(size, { bg: null, color: INK, stroke: 4.5, inset: 0 });
+const fav = (size) => png(size, { bg: null, color: INK, stroke: 5, inset: 0 });
 const images = [await fav(16), await fav(32)];
 const sizes = [16, 32];
 const head = Buffer.alloc(6);

@@ -13,7 +13,7 @@ export function LiveStrip() {
     { label: "Liquidations avoided", value: data?.totals.liquidationsAvoided ?? 0 },
   ];
   return (
-    <section aria-label="Live record" className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+    <section aria-label="Live record" className="mx-auto mt-14 w-full max-w-6xl px-4 sm:mt-16 sm:px-6">
       <dl className="grid divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         {items.map((i) => (
           <div key={i.label} className="px-6 py-5">

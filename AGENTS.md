@@ -350,7 +350,7 @@ Personal details are never shown. Use loan size bands, not exact balances, unles
 - **Bottom row:** "Built on Bitget", the year, and one short risk line ("Protection reduces risk. It cannot remove it.").
 
 **Logo and favicon:**
-- **Logo:** a simple mark, a rounded shield made of one continuous line that also reads as a steady horizon line, with a wordmark in Geist Sans 600.
+- **Logo:** a lowercase-style wordmark in Geist Sans 600 beside a monogram: an M drawn from four strokes, with a tiny "c" curl hooked onto the top-left of the left stem and a long last stroke on the right that rises above the rest. No dot.
 - **Exports:** mark only, mark with wordmark, single colour, and a 1024 px app icon.
 - **Favicon:** `favicon.svg`, `favicon.ico` (16/32), `apple-touch-icon.png` (180), `icon-512.png`. The mark must stay readable at 16 px.
 

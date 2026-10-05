@@ -1,14 +1,15 @@
-/** The mark: a rounded shield drawn as one continuous line that also reads as a steady horizon. */
-export function LogoMark({ size = 28, title }: { size?: number; title?: string }) {
+/**
+ * The mark: an M drawn from four strokes. A tiny "c" curl hooks onto the top-left of the left stem, and the last stroke on the
+ * right rises well above the rest. The same geometry is used for the favicons and exports (tools/make-brand.mjs).
+ */
+export function LogoMark({ size = 28, title, strokeWidth = 3.4 }: { size?: number; title?: string; strokeWidth?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" role={title ? "img" : undefined} aria-label={title} aria-hidden={title ? undefined : true}>
-      <path
-        d="M2 26 H8 V10 C11 9 17 9 24 5 C31 9 37 9 40 10 V26 C40 35 33 41 24 45 C15 41 8 35 8 26 H46"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <g stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M 8.6 13 A 3.7 3.7 0 1 1 12 9.7 V 42" />
+        <path d="M 12 9.7 L 25.5 29.5 L 39 11" />
+        <path d="M 39 3.5 V 42" />
+      </g>
     </svg>
   );
 }

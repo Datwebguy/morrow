@@ -76,12 +76,28 @@ body {
 }
 
 h1, h2, h3 {
+  text-wrap: balance;
   font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.12;
 }
 
 /* Every number: Geist Mono with tabular figures, so amounts line up and do not jump. */
+p {
+  text-wrap: pretty;
+}
+
+/* A fieldset's title sits inside the card, never on its border. */
+fieldset > legend {
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 0.25rem;
+}
+fieldset > legend + * {
+  clear: both;
+}
+
 .num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

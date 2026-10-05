@@ -15,7 +15,7 @@ function plannedLine(l: LoanView): string {
   if (!l.plan) return "No action planned";
   if (l.plan.payDown > 0) return `Pay down ${amount(l.plan.payDown, l.loanCoin)}`;
   if (l.plan.addBacking > 0) return `Add ${amount(l.plan.addBacking, l.backingCoin, 6)} as backing`;
-  return "Action needed, but nothing is available to use";
+  return "Action needed. Nothing available to use.";
 }
 
 export function LoanCard({ loan, onChanged }: { loan: LoanView; onChanged: () => void }) {
@@ -96,13 +96,13 @@ export function LoanCard({ loan, onChanged }: { loan: LoanView; onChanged: () =>
             </span>
             {loan.projection ? <span className="num font-medium">{percent(loan.projection.ratio)}</span> : <span className="text-muted">Not available</span>}
           </div>
-          <div className="mt-1.5 flex justify-end">
+          <div className="mt-1.5 flex">
             <TrustBadge trust={loan.trust} />
           </div>
         </div>
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
           <span className="text-muted">Planned action</span>
-          <span className="text-right font-medium">{plannedLine(loan)}</span>
+          <span className="ml-auto text-right font-medium">{plannedLine(loan)}</span>
         </div>
       </div>
     </article>

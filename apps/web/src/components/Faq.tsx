@@ -8,8 +8,9 @@ import { FAQ } from "@/content/faq";
 export function Faq() {
   const [open, setOpen] = useState<number | null>(null);
   return (
-    <section id="faq" aria-labelledby="faq-title" className="mx-auto w-full max-w-3xl scroll-mt-8 px-4 py-24 sm:px-6">
-      <h2 id="faq-title" className="text-3xl sm:text-4xl">Questions</h2>
+    <section id="faq" aria-labelledby="faq-title" className="mx-auto w-full max-w-3xl scroll-mt-8 px-4 py-24 sm:px-6 sm:py-32">
+      <p className="text-sm font-medium text-accent">Answers</p>
+      <h2 id="faq-title" className="mt-2 text-3xl sm:text-4xl">Questions</h2>
       <div className="mt-8 divide-y divide-line border-y border-line">
         {FAQ.map((item, i) => {
           const isOpen = open === i;

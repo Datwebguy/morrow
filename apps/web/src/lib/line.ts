@@ -24,12 +24,32 @@ export interface Box {
   pad: number;
 }
 
-/** Turns points into an SVG path, scaled to a box. Returns the y of the band too. A single point gives a still line. */
-export function layoutLine(data: Pick<LineData, "points" | "band">, box: Box): { d: string; bandY: number | null; head: { x: number; y: number } | null; still: boolean } {
+export interface Layout {
+  /** Solid path: one run per stretch of data. A gap in the data starts a new run, so no line is drawn across it. */
+  d: string;
+  /** Dashed connectors across gaps (the market was closed and nothing traded). Empty when there are none. */
+  gapD: string;
+  hasGap: boolean;
+  bandY: number | null;
+  head: { x: number; y: number } | null;
+  still: boolean;
+}
+
+function median(xs: number[]): number {
+  const s = [...xs].sort((a, b) => a - b);
+  return s[Math.floor(s.length / 2)] ?? 0;
+}
+
+/**
+ * Turns points into SVG paths, scaled to a box. A single point gives a still line.
+ * A jump in time bigger than 2.5 times the usual spacing is a gap in the data: the solid line stops and a dashed
+ * connector is drawn instead, so the chart never implies prices that were not there.
+ */
+export function layoutLine(data: Pick<LineData, "points" | "band">, box: Box): Layout {
   const pts = data.points;
   if (pts.length < 2) {
     const y = box.height / 2;
-    return { d: `M ${box.pad} ${y} L ${box.width - box.pad} ${y}`, bandY: null, head: null, still: true };
+    return { d: `M ${box.pad} ${y} L ${box.width - box.pad} ${y}`, gapD: "", hasGap: false, bandY: null, head: null, still: true };
   }
   const prices = pts.map((p) => p.c);
   const all = data.band ? [...prices, data.band.price] : prices;
@@ -42,7 +62,22 @@ export function layoutLine(data: Pick<LineData, "points" | "band">, box: Box): {
   const h = box.height - box.pad * 2;
   const x = (t: number): number => box.pad + ((t - t0) / (t1 - t0 || 1)) * w;
   const y = (p: number): number => box.pad + (1 - (p - lo) / span) * h;
-  const d = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${x(p.t).toFixed(1)} ${y(p.c).toFixed(1)}`).join(" ");
+  const usual = median(pts.slice(1).map((p, i) => p.t - pts[i]!.t));
+  const solid: string[] = [];
+  const dashed: string[] = [];
+  pts.forEach((p, i) => {
+    const prev = pts[i - 1];
+    const cx = x(p.t).toFixed(1);
+    const cy = y(p.c).toFixed(1);
+    if (!prev) {
+      solid.push(`M ${cx} ${cy}`);
+    } else if (usual > 0 && p.t - prev.t > usual * 2.5) {
+      dashed.push(`M ${x(prev.t).toFixed(1)} ${y(prev.c).toFixed(1)} L ${cx} ${cy}`);
+      solid.push(`M ${cx} ${cy}`);
+    } else {
+      solid.push(`L ${cx} ${cy}`);
+    }
+  });
   const last = pts[pts.length - 1]!;
-  return { d, bandY: data.band ? y(data.band.price) : null, head: { x: x(last.t), y: y(last.c) }, still: false };
+  return { d: solid.join(" "), gapD: dashed.join(" "), hasGap: dashed.length > 0, bandY: data.band ? y(data.band.price) : null, head: { x: x(last.t), y: y(last.c) }, still: false };
 }

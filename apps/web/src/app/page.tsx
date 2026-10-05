@@ -15,7 +15,6 @@ export default function Page() {
       <main id="main">
         <Hero />
         <LiveStrip />
-        <div className="h-24" />
         <HowItWorks />
         <WhyItMatters />
         <Controls />

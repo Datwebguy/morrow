@@ -25,6 +25,17 @@ describe("price line layout", () => {
     const topY = Number(l.d.split(" L ")[1]!.split(" ")[1]);
     expect(topY).toBeCloseTo(20);
   });
+  it("never draws a line across a gap in the data", () => {
+    const H = 3_600_000;
+    const pts = [0, 1, 2, 3, 60, 61, 62].map((h) => ({ t: h * H, c: 100 + h }));
+    const l = layoutLine({ points: pts, band: null }, box);
+    expect(l.hasGap).toBe(true);
+    expect(l.d.match(/M /g)).toHaveLength(2); // two separate runs of data
+    expect(l.gapD.match(/M /g)).toHaveLength(1); // one dashed connector over the closed hours
+    const none = layoutLine({ points: [0, 1, 2, 3].map((h) => ({ t: h * H, c: 100 })), band: null }, box);
+    expect(none.hasGap).toBe(false);
+    expect(none.gapD).toBe("");
+  });
   it("handles a flat price", () => {
     const l = layoutLine({ points: [{ t: 0, c: 5 }, { t: 1, c: 5 }], band: null }, box);
     expect(l.d).not.toContain("NaN");
