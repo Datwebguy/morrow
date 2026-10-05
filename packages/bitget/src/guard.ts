@@ -30,6 +30,9 @@ export const READ_OPERATIONS = [
   "getRepayHistory",
   "getBorrowHistory",
   "getLoanInterest",
+  // Account balances (read only), needed to know the user's idle balances.
+  "getAccountAssets",
+  "getAccountFundingAssets",
 ] as const;
 
 /** The only write operations Morrow may call, each with its own checks below. */

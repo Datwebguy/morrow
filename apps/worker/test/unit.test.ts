@@ -1,0 +1,105 @@
+import { describe, expect, it } from "vitest";
+import { modelAdvisor, parseChoice, rulesAdvisor, type Situation } from "../src/advisor";
+import { parseBalances, parseLoans } from "../src/loans";
+import { canonicalJson, seal, sizeBand, verifySeal, type PromiseBody } from "../src/promise";
+import { Store } from "../src/db";
+import { DEFAULT_SETTINGS, loadSettings, SettingsError, updateSettings } from "../src/settings";
+
+const body: PromiseBody = {
+  version: 1, loanId: "L1", loanCoin: "USDT", backingCoin: "rXYZ", claim: "stays_below_margin_call_at_reopen", marginCallLevel: 0.6, targetLevel: 0.5,
+  plannedAction: null, projectedHealth: 0.4, projectionBasis: "history_case", closeTs: 1, reopenTs: 2, sealedAt: 0, late: false, debtAtSeal: 500, backingAtSeal: 10,
+};
+
+describe("sealed promise", () => {
+  it("is stable whatever the key order", () => {
+    expect(canonicalJson({ b: 1, a: { d: 2, c: 3 } })).toBe(canonicalJson({ a: { c: 3, d: 2 }, b: 1 }));
+    expect(seal(body)).toBe(seal({ ...body }));
+    expect(seal(body)).toMatch(/^[0-9a-f]{64}$/);
+  });
+  it("changes if anything is edited", () => {
+    expect(seal({ ...body, targetLevel: 0.51 })).not.toBe(seal(body));
+    expect(seal({ ...body, plannedAction: { kind: "pay_down", amount: 1 } })).not.toBe(seal(body));
+  });
+  it("verifies and detects tampering", () => {
+    const f = seal(body);
+    expect(verifySeal(JSON.stringify(body), f)).toBe(true);
+    expect(verifySeal(JSON.stringify({ ...body, debtAtSeal: 1 }), f)).toBe(false);
+  });
+  it("gives size bands", () => {
+    expect(sizeBand(500)).toBe("under 1,000 USDT");
+    expect(sizeBand(7_000)).toBe("5,000 to 25,000 USDT");
+    expect(sizeBand(10_000_000)).toBe("over 100,000 USDT");
+  });
+});
+
+describe("settings", () => {
+  it("starts safe: ask first, no limits, nothing protected", () => {
+    const s = loadSettings(new Store(":memory:"));
+    expect(s).toEqual(DEFAULT_SETTINGS);
+    expect(s.mode).toBe("ask");
+    expect(s.maxPerAction).toBeNull();
+    expect(s.protectedLoans).toEqual([]);
+  });
+  it("saves valid changes and refuses bad ones", () => {
+    const store = new Store(":memory:");
+    expect(updateSettings(store, { mode: "auto", maxPerAction: 100, paused: true }).mode).toBe("auto");
+    expect(loadSettings(store).maxPerAction).toBe(100);
+    expect(() => updateSettings(store, { mode: "yolo" })).toThrow(SettingsError);
+    expect(() => updateSettings(store, { maxPerAction: -1 })).toThrow(SettingsError);
+    expect(() => updateSettings(store, { allowed: ["sell"] })).toThrow(SettingsError);
+    expect(() => updateSettings(store, { protectedLoans: [1] })).toThrow(SettingsError);
+    expect(updateSettings(store, { maxPerAction: null }).maxPerAction).toBeNull();
+  });
+});
+
+describe("loan parsing", () => {
+  it("reads a loan answer", () => {
+    const r = parseLoans({ code: "00000", data: [{ orderId: 7, loanCoin: "USDT", pledgeCoin: "rXYZ", debt: "100.5", pledgeAmount: "3" }] });
+    expect(r.loans).toEqual([{ orderId: "7", loanCoin: "USDT", backingCoin: "rXYZ", debt: 100.5, backingAmount: 3 }]);
+    expect(r.problems).toEqual([]);
+  });
+  it("finds a list inside the answer", () => {
+    const r = parseLoans({ data: { rows: [{ orderId: "1", loanCoin: "USDT", pledgeCoin: "rXYZ", debt: "1", pledgeAmount: "1" }] } });
+    expect(r.loans).toHaveLength(1);
+  });
+  it("refuses to guess when a value is missing", () => {
+    const r = parseLoans({ data: [{ orderId: "1", loanCoin: "USDT", pledgeCoin: "rXYZ", debt: "1" }, { loanCoin: "USDT" }] });
+    expect(r.loans).toEqual([]);
+    expect(r.problems).toHaveLength(2);
+  });
+  it("reports an unreadable answer", () => {
+    expect(parseLoans("nope").problems).toHaveLength(1);
+    expect(parseLoans(null).loans).toEqual([]);
+  });
+  it("reads balances and reports unreadable ones", () => {
+    expect(parseBalances({ data: [{ coin: "USDT", available: "12.5" }, { coin: "USDT", available: "1" }] }).byCoin).toEqual({ USDT: 13.5 });
+    expect(parseBalances(7).byCoin).toBeNull();
+  });
+});
+
+describe("advisor", () => {
+  const sit = { plan: { kind: "pay_down", amount: 5 } } as unknown as Situation;
+  it("parses a clear answer and turns anything else into an alert", () => {
+    expect(parseChoice('Sure: {"action":"pay_down","reason":"Too close."}', "m")).toEqual({ action: "pay_down", reason: "Too close.", by: "m" });
+    expect(parseChoice("pay down!", "m").action).toBe("alert");
+    expect(parseChoice('{"action":"sell","reason":"x"}', "m").action).toBe("alert");
+    expect(parseChoice('{"action":"none","reason":""}', "m").action).toBe("alert");
+  });
+  it("calls an OpenAI-compatible endpoint", async () => {
+    let seen = "";
+    const a = modelAdvisor({ baseUrl: "https://x.test/v1/", model: "m1", apiKey: "k" }, async (url, init) => {
+      seen = url + init.body;
+      return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: '{"action":"alert","reason":"Watch it."}' } }] }) };
+    });
+    expect(await a.choose(sit)).toEqual({ action: "alert", reason: "Watch it.", by: "m1" });
+    expect(seen).toContain("https://x.test/v1/chat/completions");
+  });
+  it("only alerts when the model cannot be reached", async () => {
+    const a = modelAdvisor({ baseUrl: "https://x.test", model: "m1", apiKey: "k" }, async () => ({ ok: false, status: 500, json: async () => ({}) }));
+    expect((await a.choose(sit)).action).toBe("alert");
+  });
+  it("rules only accepts the code plan and says so", async () => {
+    expect(await rulesAdvisor.choose(sit)).toMatchObject({ action: "pay_down", by: "rules only" });
+    expect((await rulesAdvisor.choose({ plan: null } as unknown as Situation)).action).toBe("none");
+  });
+});

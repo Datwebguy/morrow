@@ -118,8 +118,9 @@ describe("allowed writes", () => {
     const b = new MorrowBitget(t);
     await b.ongoingLoans();
     await b.debts();
-    expect(t.calls.map((c) => c.operationId)).toEqual(["getBorrowOngoing", "getLoanDebts"]);
+    await b.read("getAccountAssets");
+    expect(t.calls.map((c) => c.operationId)).toEqual(["getBorrowOngoing", "getLoanDebts", "getAccountAssets"]);
     await expect(b.read("repayCoins" as never)).rejects.toThrow();
-    expect(t.calls).toHaveLength(2);
+    expect(t.calls).toHaveLength(3);
   });
 });

@@ -86,3 +86,44 @@ export const NYSE_CALENDAR: MarketCalendar = nyseCalendarFile;
  * Stock tokens also trade extended hours around a closure, so one candle is not enough. Policy value; see docs/VERIFIED.md item 6.
  */
 export const WEEKEND_TRADING_MIN_COVERAGE = 0.5;
+
+/**
+ * Worker schedule. Policy values chosen by the product (AGENTS.md section 13, step 5: "more often near a market closure").
+ */
+export const SCHEDULE = {
+  /** Seconds between checks on an ordinary trading day. */
+  normalPollSeconds: 300,
+  /** Seconds between checks from this many hours before a closure until its reopen. */
+  nearClosurePollSeconds: 60,
+  nearClosureHours: 3,
+  /** The weekly promise is written and sealed this many minutes before the closure starts. */
+  promiseLeadMinutes: 60,
+  /** Market data older than this many seconds is too old to act on. */
+  maxDataAgeSeconds: 120,
+  /** Reopen history is rebuilt at most this often. */
+  historyRefreshHours: 6,
+  /** The official calendar is re-read at most this often. */
+  calendarRefreshHours: 24,
+  /** How many order-book levels are read for the trust check. */
+  bookLevels: 50,
+  /** How many Bitget announcements are shown to the AI. */
+  announcementsForAi: 5,
+} as const;
+
+/**
+ * Default trigger distance in points from the margin-call level.
+ * Chosen on the earlier period of the history replay (docs/METHOD.md); the user can change it in Settings.
+ */
+export const DEFAULT_TRIGGER_BUFFER_POINTS = 5;
+
+/**
+ * Loan size bands for public pages, in the borrowed coin (USDT), so exact balances are never published.
+ * Presentation choice from AGENTS.md section 6. The last band has no upper limit.
+ */
+export const LOAN_SIZE_BANDS: ReadonlyArray<{ below: number; label: string }> = [
+  { below: 1_000, label: "under 1,000 USDT" },
+  { below: 5_000, label: "1,000 to 5,000 USDT" },
+  { below: 25_000, label: "5,000 to 25,000 USDT" },
+  { below: 100_000, label: "25,000 to 100,000 USDT" },
+  { below: Number.POSITIVE_INFINITY, label: "over 100,000 USDT" },
+];
