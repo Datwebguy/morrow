@@ -1,89 +1,224 @@
 # Morrow
 
-**Borrow today. Still yours tomorrow.**
+<p align="center">
+  <strong>Protect the position. Keep the upside.</strong>
+</p>
 
-Morrow watches your Bitget stock-token loans and steps in before a margin call, so a weekend or holiday gap does not cost you your stocks.
+<p align="center">
+  Morrow monitors Bitget stock-token loans through market closures and helps reduce margin-call risk before the market reopens.
+</p>
 
-## Who it is for
+<p align="center">
+  <a href="https://themorrow.vercel.app"><img src="https://img.shields.io/badge/Live%20app-2F5BFF?style=flat-square&logo=vercel&logoColor=white" alt="Live app"></a>
+  <a href="https://github.com/Datwebguy/morrow/actions"><img src="https://img.shields.io/badge/Checks-127A5A?style=flat-square&logo=githubactions&logoColor=white" alt="Checks"></a>
+  <img src="https://img.shields.io/badge/TypeScript-0E1116?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Next.js-0E1116?style=flat-square&logo=next.js&logoColor=white" alt="Next.js">
+  <img src="https://img.shields.io/badge/License-MIT-8A5A0B?style=flat-square" alt="MIT License">
+</p>
 
-A long-term holder with 5,000 to 50,000 USDT of US stock tokens on Bitget, who borrowed USDT against them to use the cash without selling, checks the account a few times a week and does not watch the market on weekends.
+> Borrow against your stock tokens without leaving the position unwatched through the weekend.
 
-## What it does
+## Overview
 
-- Watches every protected loan, more often around a US market closure.
-- Projects loan health at the reopen, from a trusted weekend price or from that stock's own history of reopening gaps.
-- Checks the price first (last trade age, spread, depth near the price, distance from the last close). A price that fails is never acted on.
-- Steps in with two actions only, inside limits you set: pay down with the borrowed coin, or add more of the token already backing the loan.
-- Seals a promise before each closure, publishes its fingerprint, and grades it in public after the reopen.
+Morrow is a risk-monitoring and protection service for Bitget Crypto Loans backed by stock tokens.
 
-It never sells your stocks, never borrows and never withdraws. Those calls are refused in code before any request is built, and tests prove it (`packages/bitget/test`).
+It watches loan health, checks the quality of available market data, projects conditions at the next US market reopening, and prepares a constrained response when a position approaches its configured safety level.
 
-The AI chooses the kind of action. Code sizes it and checks every rule. Nothing else moves money.
+Morrow supports two protective actions:
 
-## Proof
+- **Pay down** part of the loan using the borrowed coin.
+- **Add backing** using more of the same token already backing the loan.
 
-- Live site: https://themorrow.vercel.app
-- Public record: https://themorrow.vercel.app/record
-- History replay (real Bitget prices, simulated loans): [docs/METHOD.md](docs/METHOD.md) and `apps/web/public/replay-report.json`
-- One full closure, step by step (simulated loan on real prices): [docs/closure-dry-run-RARMUSDT-2026-09-28.md](docs/closure-dry-run-RARMUSDT-2026-09-28.md)
-- What was checked against Bitget, with sources and dates: [docs/VERIFIED.md](docs/VERIFIED.md)
-- Risks: [docs/RISKS.md](docs/RISKS.md). Questions: [docs/FAQ.md](docs/FAQ.md)
+Morrow does **not** sell backing, borrow additional funds, withdraw funds, or remove backing. Those operations are blocked by the application rules before a request can be created.
 
-## Run it
+## Product surfaces
 
-Needs Node 22.13 or newer.
+| Surface | Purpose |
+| --- | --- |
+| [Website](https://themorrow.vercel.app) | Product overview and live market context |
+| [Check my loan](https://themorrow.vercel.app/check) | Review loan health using live Bitget data without connecting an account |
+| [Watch a weekend](https://themorrow.vercel.app/watch) | Follow a replay of the monitoring flow across a real market closure |
+| [Public record](https://themorrow.vercel.app/record) | Review sealed promises, grades, and published decision history |
+| `/app` | Private account view for connected users |
 
+## How it works
+
+1. **Read live conditions**  
+   Morrow reads loan parameters, balances, prices, order-book conditions, and market-calendar data from their respective sources.
+
+2. **Check data quality**  
+   Stale trades, wide spreads, insufficient depth, or unusual price moves are treated as untrusted. Untrusted data cannot authorize an action.
+
+3. **Project the reopening**  
+   The service estimates how the next market reopening could affect loan health using current conditions and the token's own reopening history where enough history exists.
+
+4. **Build the smallest safe plan**  
+   Deterministic code calculates the minimum pay-down or backing addition required to return the position to its configured target, subject to user limits and available balances.
+
+5. **Request or execute within policy**  
+   Users may require approval before an action or allow protected actions to proceed automatically. Pausing protection stops action processing immediately.
+
+6. **Record the result**  
+   Each decision includes its inputs, data-trust status, reason, selected action, result, and receipt information. Closure promises are sealed before the event and graded after reopening.
+
+## Safety boundary
+
+The decision layer is advisory. It cannot override the safety layer.
+
+Application code independently enforces:
+
+- live loan limits and market data;
+- stale-data and price-trust checks;
+- configured targets and spending limits;
+- available balances;
+- allowed action types;
+- pause and approval settings;
+- same-token backing requirements;
+- no-borrow, no-withdraw, no-sell, and no-backing-removal rules.
+
+If data is missing, stale, ambiguous, or unavailable, Morrow alerts or waits. It does not guess and it does not act.
+
+## Real data and replay data
+
+The public product distinguishes between live and simulated information.
+
+- **Live data** comes from Bitget, the connected account, and the official NYSE market calendar.
+- **Replay data** uses real historical Bitget prices with hypothetical loans to evaluate the rules.
+- **Shadow-ledger data** is a dry-run representation used when live loan operations are unavailable. It is not a real account action.
+
+Replay and shadow-ledger results are labelled as simulated wherever they are shown. They are not claims about customer performance or investment returns.
+
+## Architecture
+
+```text
+apps/web       Next.js website, public tools, account interface, and record pages
+apps/worker    Monitoring scheduler, HTTP API, decisions, approvals, and action records
+packages/core  Loan calculations, reopening risk, data trust, sizing, and safety rules
+packages/bitget Typed Bitget integration with write-operation safeguards
+packages/config Shared endpoints, schedules, calendars, and product configuration
+scripts/replay Historical market replay and report generation
+docs/          Product method, risks, verification notes, and operating documentation
 ```
+
+The repository is an npm workspace. The web application and worker are separate runtime components:
+
+- The **web application** is deployed as a Next.js project.
+- The **worker** runs as a separate long-lived service and exposes the account API and public record endpoints.
+
+## Requirements
+
+- Node.js **22.13 or newer**
+- npm
+- A Bitget account and appropriately restricted API credentials for connected-account operation
+- A persistent database path for the worker
+
+Never commit credentials. Store deployment secrets in the hosting provider's encrypted environment-variable settings.
+
+## Local development
+
+Install dependencies:
+
+```bash
 npm ci
+```
+
+Run validation:
+
+```bash
 npm run lint
 npm run typecheck
 npm test
 npm run build
 ```
 
-Replay (pulls real hourly history from Bitget, then writes `apps/web/public/replay-report.json`):
+Run the web application locally:
 
-```
-npm run replay
-```
-
-Website, app and record page (Next.js):
-
-```
+```bash
 NEXT_PUBLIC_WORKER_URL=http://localhost:8787 npm run build --workspace apps/web
 npm run start --workspace apps/web
 ```
 
-Worker (watches loans, seals and grades promises, serves the record and the app's API):
+Run the worker locally:
 
-```
-APP_TOKEN=<a long random secret> DATABASE_PATH=morrow.db npm start
-```
-
-Without Bitget variables the worker runs, serves an empty public record, and reports "Bitget is not connected". Add `BITGET_API_KEY`, `BITGET_SECRET_KEY` and `BITGET_PASSPHRASE` (a key with trade permission and **withdrawals turned off**) to connect. Every action is a dry run until you set `MORROW_LIVE_ACTIONS=go-live`. See `.env.example` for all variable names.
-
-## Layout
-
-```
-apps/web        Website (/), app (/app), public record (/record)
-apps/worker     Scheduler: checks, promises, grades, actions, API
-packages/core   Pure logic: loan maths, reopen risk, trust checks, sizing, rules
-packages/bitget Typed client over the official Bitget SDK with the hard limits
-packages/config The only place for constants, and the stored NYSE calendar
-scripts/replay  History replay and report
-docs/           Verified facts, method, risks, questions, submission pack
+```bash
+APP_TOKEN=<long-random-secret> DATABASE_PATH=morrow.db npm start
 ```
 
-## Real data only
+Generate the historical replay report:
 
-Prices, limits, rates, token lists, balances and market hours are read live from Bitget, the user's account or the official NYSE calendar. `npm run lint` fails the build if mock-style words or loan-limit numbers appear in shipped code. The history replay uses real prices with simulated loans, and every such number is labelled simulated.
+```bash
+npm run replay
+```
+
+## Configuration
+
+The example file lists supported variable names without values:
+
+```text
+.env.example
+```
+
+Common worker settings include:
+
+| Variable | Purpose |
+| --- | --- |
+| `APP_TOKEN` | Protects private worker routes |
+| `APP_ORIGIN` | Allowed web-app origin for private requests |
+| `DATABASE_PATH` | Primary worker database path |
+| `SHADOW_DATABASE_PATH` | Optional separate shadow-ledger database path |
+| `BITGET_API_KEY` | Bitget account credential, stored only on the worker |
+| `BITGET_SECRET_KEY` | Bitget account credential, stored only on the worker |
+| `BITGET_PASSPHRASE` | Bitget account credential, stored only on the worker |
+| `NEXT_PUBLIC_WORKER_URL` | Web application's worker URL |
+| `NEXT_PUBLIC_SITE_URL` | Canonical public site URL |
+| `MORROW_LIVE_ACTIONS` | Set to `go-live` only after reviewing the deployment and safety settings |
+
+Keep withdrawals disabled on any Bitget credential used by the worker. Start with dry-run operation and approval-required settings while validating a deployment.
+
+## Deployment notes
+
+For the Next.js project, configure the hosting platform to use:
+
+- Node.js 22.x;
+- `npm ci` as the install command;
+- `npm run build --workspace apps/web` as the build command;
+- `apps/web` as the application workspace or the repository root, depending on the hosting configuration;
+- `NEXT_PUBLIC_WORKER_URL` pointing to the deployed worker;
+- `NEXT_PUBLIC_SITE_URL` pointing to the public web domain.
+
+The worker should run separately as a persistent service with its own database and server-side credentials. Do not place Bitget credentials or `APP_TOKEN` in any `NEXT_PUBLIC_*` variable.
+
+## Testing and quality
+
+The test suite covers the core calculations, reopening projections, data-trust checks, action sizing, request validation, public endpoints, decision records, and forbidden operation safeguards.
+
+Before merging changes, run:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+## Risk disclosure
+
+Morrow is a protection tool, not a guarantee. Market conditions can change quickly, exchange services can become unavailable, liquidity can disappear, and an action may fail or arrive too late. Users remain responsible for their account, credentials, limits, and decisions about whether to enable protection.
+
+Review the product risk notes in [`docs/RISKS.md`](docs/RISKS.md) before connecting an account or enabling live actions.
+
+## Documentation
+
+- [Method](docs/METHOD.md)
+- [Risks](docs/RISKS.md)
+- [FAQ](docs/FAQ.md)
+- [Verification notes](docs/VERIFIED.md)
+- [Closure replay](docs/closure-dry-run-RARMUSDT-2026-09-28.md)
 
 ## Security
 
-Report a vulnerability privately through GitHub: https://github.com/Datwebguy/morrow/security/advisories/new
+Please report security vulnerabilities privately through [GitHub Security Advisories](https://github.com/Datwebguy/morrow/security/advisories/new). Do not publish sensitive security details in a public issue.
 
-Please do not open a public issue for a security problem.
+## License
 
-## Licence
-
-MIT. See [LICENSE](LICENSE).
+Morrow is released under the [MIT License](LICENSE).
