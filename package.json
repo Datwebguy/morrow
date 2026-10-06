@@ -16,7 +16,7 @@
     "test": "vitest run",
     "build": "npm run build --workspaces --if-present",
     "replay": "npm run replay --workspace scripts/replay",
-    "start": "npm run start --workspace apps/worker"
+    "start": "node --no-warnings=ExperimentalWarning --import tsx apps/worker/src/index.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
