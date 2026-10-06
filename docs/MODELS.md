@@ -1,41 +1,35 @@
-# Choosing the AI model
+# Decision provider configuration
 
-Morrow's AI makes one choice per loan that needs attention: do nothing, alert, pay down, or add backing. It never sets an amount. Code sizes every action and checks every rule, so the model can be swapped without touching the safety layer (`docs/RISKS.md`).
+Morrow uses a configurable decision provider to classify situations before a market reopening. The provider may return one of four decisions: do nothing, alert, pay down, or add backing. It never sets an amount; deterministic application code sizes and validates every action.
 
-## Anthropic (Claude), through its own SDK
+## Configuration
 
-Set `LLM_API_KEY` to a key from console.anthropic.com (it starts with `sk-ant-`). That is all: the provider is detected from the key, the model defaults to `claude-sonnet-5-5`, and the worker uses Anthropic's official SDK (not a compatibility layer), with medium effort, no sampling settings, and the refusal fallback on. `LLM_PROVIDER=anthropic` forces it, and `LLM_MODEL` picks another Claude model. Leave `LLM_BASE_URL` empty.
+Set these variables on the worker host only:
 
-## The settings for any other provider
-
-Set these on the worker (Railway, Variables). Nothing else changes when you switch model.
-
-| Variable | What it is |
+| Variable | Purpose |
 |---|---|
-| `LLM_BASE_URL` | The provider's chat-completions base address |
-| `LLM_MODEL` | The model name the provider uses |
-| `LLM_API_KEY` | Your key for that provider. Type it into the host's variables page only |
+| `LLM_BASE_URL` | Base URL for an OpenAI-compatible chat-completions service. |
+| `LLM_MODEL` | Model identifier accepted by that service. |
+| `LLM_API_KEY` | Provider credential. Store it only in the host's secret-variable settings. |
+| `LLM_PROVIDER` | Optional provider selector when a provider needs explicit selection. |
 
-The older names `MODEL_BASE_URL`, `MODEL_NAME` and `MODEL_API_KEY` still work. The `LLM_` names win when both are set. With none set, Morrow runs "rules only" and every log line says so.
+The legacy names `MODEL_BASE_URL`, `MODEL_NAME`, and `MODEL_API_KEY` remain supported for existing deployments. The `LLM_` variables take precedence when both forms are present.
 
-## Which model is running
+If no provider is configured, Morrow uses its deterministic rules advisor. This is a safe operating mode: unclear, unavailable, or invalid provider responses become alerts and never become actions.
 
-`GET /public/health` on the worker returns `model`: the name in `LLM_MODEL`, or `rules only`. Every logged decision also records the model that made it. The submission names the model that actually made the logged decisions.
+## Safety boundary
 
-## Providers
+The decision provider can recommend only:
 
-Any host that accepts the common chat-completions request format works. Base addresses, from each provider's own documentation (only the first row was checked against the provider's page for this project; the others have not been run here):
+- no action;
+- an alert;
+- paying down part of the borrowed coin; or
+- adding more of the existing backing token.
 
-| Provider | `LLM_BASE_URL` | Example `LLM_MODEL` |
-|---|---|---|
-| Google Gemini | `https://generativelanguage.googleapis.com/v1beta/openai/` | `gemini-3.8-flash` (Google's current fast model, per its models page, 5 Oct 2026) |
-| OpenAI | `https://api.openai.com/v1` | a current OpenAI model name |
-| Qwen (Alibaba Model Studio) | the compatible-mode address in your account | `qwen3.8-max` was reported by another builder, not Bitget. Check the details Bitget sends |
-| OpenRouter | `https://openrouter.ai/api/v1` | any listed model |
-| Groq | `https://api.groq.com/openai/v1` | any listed model |
-| Anthropic | `https://api.anthropic.com/v1/` (its compatibility layer) | a current Claude model name |
-| A local model (Ollama) | `http://localhost:11434/v1` | the local model name |
+Application code independently enforces the amount, user limits, available balance, price-trust checks, pause state, and the rules that prevent selling backing, borrowing, withdrawing, or removing backing.
 
-## What happens when the model fails
+## Failure behavior
 
-A timeout (25 seconds), a network error, a non-answer or an unclear answer becomes an alert. It never becomes an action, and it never stops the cycle.
+A timeout, network failure, invalid response, refusal, or unclear recommendation becomes an alert. It does not stop the monitoring cycle and cannot authorize an action by itself.
+
+The worker's health endpoint reports whether a decision provider is configured. It does not expose credentials or provider response content.
