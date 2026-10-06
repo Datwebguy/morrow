@@ -31,6 +31,27 @@ const shadowCache = new ProfileCache(shadow);
 const shadowDeps = { store: shadowStore, ports: shadow, advisor, liveActions: false, cache: shadowCache };
 const names = new CompanyNames();
 const logos = new LogoSync(store, liveLogoDeps());
+const problemCounts = new Map<string, number>();
+
+function isBitgetCredentialProblem(line: string): boolean {
+  const x = line.toLowerCase();
+  return x.includes("apikey/password is incorrect") || (x.includes("api key") && x.includes("incorrect")) || x.includes("invalid signature");
+}
+
+function logCycleProblem(line: string): void {
+  const count = (problemCounts.get(line) ?? 0) + 1;
+  problemCounts.set(line, count);
+  // Log the first time, then every 12 repeats (~hourly on a 5-minute poll) to keep logs readable.
+  if (count === 1 || count % 12 === 0) {
+    const suffix = count > 1 ? ` (repeated ${count} times)` : "";
+    console.warn(`${line}${suffix}`);
+  }
+  if (count === 1 && isBitgetCredentialProblem(line)) {
+    console.error(
+      "Bitget rejected the credentials. Check BITGET_API_KEY, BITGET_SECRET_KEY and BITGET_PASSPHRASE, ensure the key is mainnet with needed permissions, and disable API IP whitelist for Railway.",
+    );
+  }
+}
 
 const port = Number(env["PORT"] ?? 8787);
 const server = createServer({ ...deps, appToken: env["APP_TOKEN"] ?? null, allowedOrigin: env["APP_ORIGIN"] ?? null, connected: keys !== null, listTokens: () => liveBackingTokens(names, (c) => store.getLogo(c)?.name ?? null), shadow: { store: shadowStore, ports: shadow, cache: shadowCache }, advisor, modelName: modelConfig?.model ?? "rules only" }).listen(port, () => {
@@ -49,7 +70,7 @@ async function loop(): Promise<void> {
     }
     const r = await runCycle(deps);
     delay = nextDelaySeconds(r.nowMs, r.closure);
-    for (const p of r.problems) console.warn(p);
+    for (const p of r.problems) logCycleProblem(p);
     {
       try {
         let closure = null;
