@@ -77,4 +77,12 @@ describe("worker server", () => {
     const { base } = await start("secret");
     expect((await fetch(`${base}/nope`)).status).toBe(404);
   });
+  it("serves a root health route for deployment probes", async () => {
+    const { base } = await start("secret");
+    const res = await fetch(`${base}/`);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.service).toBe("worker");
+  });
 });
