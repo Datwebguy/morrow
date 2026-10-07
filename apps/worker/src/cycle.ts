@@ -46,8 +46,8 @@ function logQuiet(d: Deps, kind: "check" | "refused" | "alert", a: Assessment, d
   });
 }
 
-async function notifyUser(d: Deps, settings: UserSettings, a: Assessment, text: string): Promise<void> {
-  logQuiet(d, "alert", a, null, text);
+async function notifyUser(d: Deps, settings: UserSettings, a: Assessment, text: string, decision: Decision | null): Promise<void> {
+  logQuiet(d, "alert", a, decision, text);
   if (settings.telegramChatId) {
     try {
       await d.ports.notify(settings.telegramChatId, `${a.instrument}: ${text}`);
@@ -127,11 +127,11 @@ export async function runCycle(d: Deps): Promise<CycleReport> {
       const pending = d.store.pendingApprovals(loan.orderId);
       if (pending.length === 0) {
         const id = d.store.addApproval(nowMs, loan.orderId, { kind: decision.proposal.kind, amount: decision.proposal.amount, price: decision.proposal.price, reason: decision.reason, closeTs: report.closure?.closeTs ?? null });
-        d.store.addLog({ ts: nowMs, kind: "approval", loanId: loan.orderId, instrument: a.instrument, direction: decision.proposal.kind === "pay_down" ? "pay down" : "add backing", price: a.price, quantity: decision.proposal.amount, balanceChange: "none", simulated: d.ports.simulated, reason: `Waiting for your approval: ${decision.reason}`, detail: { approvalId: id } });
-        await notifyUser(d, settings, a, `Approve needed. ${decision.reason}`);
+        d.store.addLog({ ts: nowMs, kind: "approval", loanId: loan.orderId, instrument: a.instrument, direction: decision.proposal.kind === "pay_down" ? "pay down" : "add backing", price: a.price, quantity: decision.proposal.amount, balanceChange: "none", simulated: d.ports.simulated, reason: `Waiting for your approval: ${decision.reason}`, detail: { approvalId: id, choice: decision.choice } });
+        await notifyUser(d, settings, a, `Approve needed. ${decision.reason}, decision`);
       }
     } else if (decision.outcome === "alert") {
-      await notifyUser(d, settings, a, decision.reason);
+      await notifyUser(d, settings, a, decision.reason, decision);
     } else if (decision.outcome === "refused") {
       logQuiet(d, "refused", a, decision, decision.reason);
     } else {
