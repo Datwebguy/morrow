@@ -128,7 +128,7 @@ export async function runCycle(d: Deps): Promise<CycleReport> {
       if (pending.length === 0) {
         const id = d.store.addApproval(nowMs, loan.orderId, { kind: decision.proposal.kind, amount: decision.proposal.amount, price: decision.proposal.price, reason: decision.reason, closeTs: report.closure?.closeTs ?? null });
         d.store.addLog({ ts: nowMs, kind: "approval", loanId: loan.orderId, instrument: a.instrument, direction: decision.proposal.kind === "pay_down" ? "pay down" : "add backing", price: a.price, quantity: decision.proposal.amount, balanceChange: "none", simulated: d.ports.simulated, reason: `Waiting for your approval: ${decision.reason}`, detail: { approvalId: id, choice: decision.choice } });
-        await notifyUser(d, settings, a, `Approve needed. ${decision.reason}, decision`);
+        await notifyUser(d, settings, a, `Approve needed. ${decision.reason}`, decision);
       }
     } else if (decision.outcome === "alert") {
       await notifyUser(d, settings, a, decision.reason, decision);
