@@ -9,3 +9,4 @@ coverage
 *.log
 .cache
 next-env.d.ts
+*.tsbuildinfo
