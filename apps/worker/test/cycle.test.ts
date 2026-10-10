@@ -301,3 +301,18 @@ describe("schedule", () => {
     expect(nextDelaySeconds(SATURDAY, c)).toBeLessThan(nextDelaySeconds(c.closeTs - 24 * 3_600_000, c));
   });
 });
+
+describe("the log does not repeat the same situation", () => {
+  it("logs one alert an hour for the same loan and outcome even when the AI words it differently", async () => {
+    const w = world({ advisor: { async choose() { return { action: "alert", reason: `Wording ${Math.random()}`, by: "m" }; } } });
+    updateSettings(w.store, { protectedLoans: ["L1"], ...limits, mode: "auto" });
+    for (let i = 0; i < 6; i++) {
+      w.state.now += 5 * 60_000;
+      await runCycle(w.deps);
+    }
+    expect(w.store.allLog().filter((l) => l.kind === "alert")).toHaveLength(1);
+    w.state.now += 61 * 60_000;
+    await runCycle(w.deps);
+    expect(w.store.allLog().filter((l) => l.kind === "alert")).toHaveLength(2);
+  });
+});

@@ -10,7 +10,6 @@
 
 <p align="center">
   <a href="https://themorrow.vercel.app"><img src="https://img.shields.io/badge/Live%20app-2F5BFF?style=flat-square&logo=vercel&logoColor=white" alt="Live app"></a>
-  <a href="https://github.com/Datwebguy/morrow/actions"><img src="https://img.shields.io/badge/Checks-127A5A?style=flat-square&logo=githubactions&logoColor=white" alt="Checks"></a>
   <img src="https://img.shields.io/badge/TypeScript-0E1116?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/Next.js-0E1116?style=flat-square&logo=next.js&logoColor=white" alt="Next.js">
   <img src="https://img.shields.io/badge/License-MIT-8A5A0B?style=flat-square" alt="MIT License">

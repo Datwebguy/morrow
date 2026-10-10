@@ -34,14 +34,17 @@ function monthStartMs(nowMs: number): number {
 }
 
 function logQuiet(d: Deps, kind: "check" | "refused" | "alert", a: Assessment, decision: Decision | null, reason: string): void {
+  // The same situation within the hour is logged once, even when the AI words it differently or a projected number moves a little.
+  const sig = `${a.phase}|${decision?.outcome ?? ""}|${decision?.choice?.action ?? ""}`;
   const last = d.store.lastLog(a.loan.orderId, kind);
-  if (last && last.reason === reason && a.nowMs - last.ts < HOUR) return; // same message within the hour: do not repeat
+  const lastSig = (last?.detail as { sig?: string } | null | undefined)?.sig;
+  if (last && a.nowMs - last.ts < HOUR && (last.reason === reason || lastSig === sig)) return;
   d.store.addLog({
     ts: a.nowMs, kind, loanId: a.loan.orderId, instrument: a.instrument, direction: "", price: a.price, quantity: null, balanceChange: "none",
     simulated: d.ports.simulated, reason,
     detail: {
       phase: a.phase, health: a.healthNow, projection: a.projection, trust: a.trust, plan: a.plan, problems: a.problems, choice: decision?.choice ?? null,
-      violations: decision?.violations ?? [],
+      violations: decision?.violations ?? [], sig,
     },
   });
 }

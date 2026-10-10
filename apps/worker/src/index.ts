@@ -11,7 +11,7 @@ import { keysFromEnv, liveBackingTokens, liveMostTraded, livePorts } from "./liv
 import { createServer } from "./server";
 import { liveLogoDeps, LogoSync } from "./logos";
 import { CompanyNames } from "./names";
-import { ensureBook, shadowPorts } from "./shadow";
+import { ensureBook, pickWithHistory, shadowPorts } from "./shadow";
 
 const env = process.env;
 const store = new Store(env["DATABASE_PATH"] ?? "morrow.db");
@@ -79,7 +79,7 @@ async function loop(): Promise<void> {
         } catch {
           closure = null;
         }
-        await ensureBook(shadow, shadowStore, () => liveMostTraded(SIMULATION.shadowTokens), closure);
+        await ensureBook(shadow, shadowStore, async () => pickWithHistory(shadow, shadowCache, await liveMostTraded(SIMULATION.shadowTokens * SIMULATION.shadowCandidateFactor), SIMULATION.shadowTokens), closure);
         await runCycle(shadowDeps);
       } catch (e) {
         console.error("Shadow cycle failed:", e instanceof Error ? e.message : e);

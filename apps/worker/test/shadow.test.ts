@@ -8,7 +8,7 @@ import { runCycle, type Deps } from "../src/cycle";
 import { Store } from "../src/db";
 import { publicRecord } from "../src/record";
 import { createServer } from "../src/server";
-import { ensureBook, loadBook, openBook, shadowPorts } from "../src/shadow";
+import { ensureBook, loadBook, openBook, pickWithHistory, shadowPorts } from "../src/shadow";
 import { COIN, LIMITS, world } from "./fixtures";
 
 const servers: Array<{ close(): void }> = [];
@@ -172,5 +172,19 @@ describe("shadow ledger: public routes", () => {
     expect(text.split("\n")[0]).toBe("timestamp,kind,instrument,direction,price,quantity,balance_change,reason,decided_by,mode");
     expect(text).toMatch(/simulated/);
     expect(text).not.toMatch(/shadow-|-p\d/); // no loan ids
+  });
+});
+
+describe("shadow ledger: choosing tokens", () => {
+  it("skips a token with too little reopening history and keeps the next one that has enough, in trading order", async () => {
+    const { w } = shadowWorld();
+    const base = w.ports;
+    const symbolFor = base.market.symbolFor.bind(base.market);
+    // rNEW has a market but no history at all; rXYZ has the fixture's full history; rGONE has no market.
+    const market = { ...base.market, symbolFor: async (c: string) => (c === "rNEW" ? "RNEWUSDT" : symbolFor(c)), history: async (s: string, f: number, t: number) => (s === "RNEWUSDT" ? [] : base.market.history(s, f, t)) };
+    const probe = { ...base, market };
+    const cache = new ProfileCache(probe);
+    expect(await pickWithHistory(probe, cache, ["rNEW", "rGONE", COIN], 2)).toEqual([COIN]);
+    expect(await pickWithHistory(probe, cache, [COIN, "rNEW"], 1)).toEqual([COIN]);
   });
 });

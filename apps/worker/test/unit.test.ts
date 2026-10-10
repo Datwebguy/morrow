@@ -191,3 +191,17 @@ describe("Anthropic as the model", () => {
     expect(typeof advisorFor({ provider: "openai-compatible", baseUrl: "https://x.test", model: "m", apiKey: "k" }).choose).toBe("function");
   });
 });
+
+describe("the AI is told when a stale price does not matter", () => {
+  it("says a history-case projection does not use the live price, so untrusted price data is no reason to alert", async () => {
+    let system = "";
+    const a = modelAdvisor({ provider: "openai-compatible", baseUrl: "https://x.test", model: "m", apiKey: "k" }, async (_u, init) => {
+      system = JSON.parse(init.body).messages[0].content;
+      return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: '{"action":"none","reason":"ok"}' } }] }) };
+    });
+    await a.choose({ plan: null } as unknown as Situation);
+    expect(system).toMatch(/history_case/);
+    expect(system).toMatch(/NOT a reason to alert/);
+    expect(system).toMatch(/live_price/);
+  });
+});

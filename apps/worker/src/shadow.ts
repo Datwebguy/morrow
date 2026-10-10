@@ -1,6 +1,7 @@
 import { MorrowBitget, type AddBackingRequest, type PayDownRequest, type WriteResult } from "@morrow/bitget";
 import { CHECK_MY_LOAN, SCHEDULE, SIMULATION } from "@morrow/config";
 import type { MarketClosure } from "@morrow/core";
+import type { ProfileCache } from "./assess";
 import type { Store } from "./db";
 import type { Balances, LoanRead, MarketPort, Ports } from "./ports";
 import { updateSettings } from "./settings";
@@ -69,6 +70,24 @@ export async function openBook(base: Ports, store: Store, coins: string[], close
     maxPerAction: SIMULATION.backingValueUsdt, maxPerWeekend: cap, maxPerMonth: cap * 4,
   });
   return book;
+}
+
+/**
+ * From tokens ranked by trading, keeps the first `count` that have enough reopening history for Morrow to project and act on.
+ * A token with too little history cannot be protected, so a simulated loan on it would only sit there.
+ */
+export async function pickWithHistory(base: Ports, cache: ProfileCache, ranked: string[], count: number): Promise<string[]> {
+  const out: string[] = [];
+  for (const coin of ranked) {
+    if (out.length >= count) break;
+    try {
+      const symbol = await base.market.symbolFor(coin);
+      if (symbol && (await cache.get(symbol)).risk !== null) out.push(coin);
+    } catch {
+      // A token whose history cannot be read right now is skipped, not guessed.
+    }
+  }
+  return out;
 }
 
 /**

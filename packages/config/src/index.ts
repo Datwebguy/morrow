@@ -83,6 +83,8 @@ export const SIMULATION = {
   watchStartPosition: 0.5,
   /** How many stock tokens the shadow ledger follows (the most traded ones, read live). */
   shadowTokens: 5,
+  /** The shadow ledger looks this many times further down the most-traded list for tokens with enough history. */
+  shadowCandidateFactor: 4,
 } as const;
 
 /**

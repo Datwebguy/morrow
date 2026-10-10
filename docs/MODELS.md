@@ -17,6 +17,10 @@ The legacy names `MODEL_BASE_URL`, `MODEL_NAME`, and `MODEL_API_KEY` remain supp
 
 If no provider is configured, Morrow uses its deterministic rules advisor. This is a safe operating mode: unclear, unavailable, or invalid provider responses become alerts and never become actions.
 
+## Anthropic (Claude)
+
+Set `LLM_PROVIDER=anthropic` and `LLM_API_KEY` to an Anthropic key. The worker then uses Anthropic's official SDK, defaults to `claude-sonnet-5-5` at medium effort, and ignores any leftover non-Claude address or model name. `LLM_MODEL` can pick another Claude model.
+
 ## Safety boundary
 
 The decision provider can recommend only:

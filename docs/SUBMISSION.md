@@ -88,7 +88,7 @@ AI should judge, and code should enforce. In Morrow the model reads the situatio
 
 ## Role of the AI model
 
-**The model:** Claude from Anthropic (default `claude-sonnet-5-5`) through Anthropic's official SDK, set with `LLM_API_KEY` alone. The worker also speaks to any chat-completions provider (Gemini, OpenAI, Qwen and the like) by changing `LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL` and `LLM_API_KEY` (`docs/MODELS.md`). The worker reports the model it is running at `/public/health`, and every logged decision records the model that made it. **Before you submit, confirm the name from `/public/health` and the log.** If no key is set, Morrow runs "rules only" and the log says so, so the form must say that instead.
+**The model:** the decisions in the public log were made by `gpt-4.1-mini` (OpenAI), through a chat-completions endpoint set with `LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL` and `LLM_API_KEY`: 2,630 logged decisions by 10 Oct 2026, each tagged with the model in the log's `decided_by` column. Eight earlier simulated pay-downs on 5 Oct were made by "rules only", before a model was connected, and say so. Switching provider (Anthropic's Claude through its own SDK, Gemini, Qwen and the like) means changing only those variables (`docs/MODELS.md`). The worker reports the model it is running at `/public/health`. **If you change the model, change this line to match the log.**
 
 What the model decides: for a loan that is projected near its margin-call level, one of none, alert, pay down or add backing, and one plain sentence for the user. It is shown the projected loan health, the price trust result, the move since the close, the stock's historical reopening drop, the code's smallest plan, the actions the user allows, and the latest Bitget announcements.
 
@@ -125,6 +125,6 @@ Demo Day and K3 subsidy: your choice. Not filled in.
 
 1. Post the X post. Without it the entry is invalid.
 2. Record the video from `docs/VIDEO_SCRIPT.md` and add its link.
-3. Check `/public/health` on the worker shows the Claude model name, and name that model in the form. If it says "rules only", say "rules only".
+3. Check `/public/health` on the worker and the log's `decided_by` column, and name that model in the form (`gpt-4.1-mini` at the time of writing).
 4. The app behind "Connect Bitget" is the owner's own account only. In the video, show `/check`, `/watch` (press Start), `/record` and the public view at `/app`, and label anything simulated as simulated.
 5. If you connect a real loan, run it in Ask me first mode with dry run until you decide to go live, and replace the simulated case with your own.

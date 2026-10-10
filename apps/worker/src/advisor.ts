@@ -90,7 +90,9 @@ type FetchLike = (url: string, init: { method: string; headers: Record<string, s
 const SYSTEM = [
   "You judge whether a stock-backed crypto loan needs action before the US stock market reopens.",
   "You choose exactly one of: none, alert, pay_down, add_backing. You never choose amounts. Code sizes and checks everything.",
-  "Choose pay_down or add_backing only if the plan is needed and the price evidence supports it. Prefer alert when the data is unclear.",
+  "Choose pay_down or add_backing only if the plan is needed and the evidence supports it. Prefer alert when the data is unclear.",
+  "projectionBasis says what the projection rests on. When it is history_case, the projection comes from this stock's own past reopening gaps and the live price is not used, so priceTrust being false is NOT a reason to alert or to hold back: act on the plan.",
+  "When projectionBasis is live_price, the live price is used, so untrusted price data is a reason to alert.",
   "Answer with one JSON object: {\"action\": \"...\", \"reason\": \"one short plain sentence for the user\"}.",
   "Use the words loan health, margin-call level, backing, pay down, add backing. No jargon.",
 ].join(" ");
